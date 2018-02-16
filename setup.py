@@ -1,6 +1,6 @@
 import re
 import ast
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 _version_re = re.compile(r'__version__\s+=\s+(.*)')
@@ -20,7 +20,7 @@ setup(
     author_email='gavrilovseva@gmail.com',
     version=version,
     url='https://github.com/trocafone/etls/tree/master/reporter',
-    packages=['reports'],
+    packages=find_packages(),
     description='A simple business reporting system',
     install_requires=requirements,
     include_package_data=True,
