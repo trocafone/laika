@@ -23,6 +23,7 @@ setup(
     packages=['reports'],
     description='A simple business reporting system',
     install_requires=requirements,
+    include_package_data=True,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python'
