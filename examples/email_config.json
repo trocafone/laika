@@ -1,0 +1,20 @@
+{
+  "reports": [
+    {
+      "name": "query_to_email",
+      "type": "query",
+      "query_file": "query.sql",
+      "connection": "local",
+      "results": [
+        {
+          "type": "email",
+          "filename": "report_{Y}-{m}-{d}_{H}-{M}.xlsx",
+          "recipients": "some_recipient@mail.com",
+          "subject": "Some report",
+          "profile": "my_gmail",
+          "connection": "gmail_smtp"
+        }
+      ]
+    }
+  ]
+}

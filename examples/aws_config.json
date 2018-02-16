@@ -1,0 +1,19 @@
+{
+  "reports": [
+    {
+      "name": "s3_example",
+      "type": "s3",
+      "profile": "custom_aws",
+      "bucket": "some.bucket",
+      "filename": "reports/custom_report.csv",
+      "results": [
+        {
+          "type": "s3",
+          "profile": "custom_aws",
+          "bucket": "another.bucket",
+          "filename": "key/a_file.txt"
+        }
+      ]
+    }
+  ]
+}
