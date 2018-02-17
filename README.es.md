@@ -62,9 +62,9 @@ Reporter toma los reportes posibles desde un archivo en formato json. Este archi
 ```json
 {
   "include": [...],
-  "reports": [...],
   "connections": [...],
-  "profiles": [...]
+  "profiles": [...],
+  "reports": [...]
 }
 ```
 
@@ -157,10 +157,9 @@ Los reportes se especifican como objetos json, los siguientes campos son
 requiridos:
 
   - name: El nombre del reporte, el cual luego se va a poder usar por línea de comando.
-  - type: El tipo de reporte. Los tipos existentes al momento: *query* y *redash*.
-  - results: Listado de configuraciones de como guardar el resultado. Cada result en esa
-    lista Tiene que ser un objeto. *type* es el campo requirido para
-    todos los resultados, el resto de los campos se detallarán más adelante.
+  - type: El tipo de reporte. Abajo se describen los tipos de reportes soportados.
+  - results: Listado de configuraciones de como guardar el resultado ([Documentación de resultados](#Results)).
+  - Set de campos que pueden ser requeridos u opcionales que se detallan más abajo.
 
 #### Query
 
@@ -435,6 +434,8 @@ TODO: document
 
 
 ### Results
+
+Los resultados se definen para cada reporte en un listado. Cada result en esa lista tiene que ser un objeto con el campo *type* definido, el resto de los campos depende de ese tipo.
 
 #### File
 
