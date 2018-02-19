@@ -141,3 +141,91 @@ Reports are json objects that must define these fields:
  - results: list of results configuration that define how to save the reports ([Results documentation](#Results)).
  - Set of required or optional fields that are detailed below.
 
+#### Query
+
+`type: query`. This report runs a query to some database. Should work with any database supported by Sqlalchemy but right now it's only tested with PostgreSQL. These are the configurations:
+
+ - query_file: path to a file that contains plane sql code.
+ - connection: name of the connection to use.
+ - variables: A dictionary with values to replace in query code. You can find further explanation in [Reports parametrization](#reports-parametrization)
+
+Example of a *query* report:
+
+```json
+{
+  "name": "my_shiny_query",
+  "type": "query",
+  "query_file": "/my/dir/query.sql",
+  "connection": "local",
+  "variables": {
+    "foo": "bar"
+  },
+  "results": [...]
+}
+```
+
+#### Bash Script
+
+`type: bash`. This report executes a bash command and reads it's output. You can interpret this report as the `read_output` part of this example:
+
+```bash
+$ bash_script | read_output
+```
+
+These are the configurations:
+
+ - script: command to execute
+ - script_file: path to the file with bash script to execute. If *script* is defined, this field will be ignored.
+ - result_type: type of output data format. Can be *csv*, *json* or *raw*. In case of *raw*, the content will not be converted and will be passed as is to the result. The explanation of *json* format is explained below.
+
+Example bash script report:
+
+```json
+{
+  "name": "some_bash_script",
+  "type": "bash",
+  "script_file": "some_script.sh",
+  "result_type": "json",
+  "results": [...]
+}
+```
+
+
+##### Bash Script json format
+
+Json data will be converted to a pandas dataframe using `pd.read_json` function ([Docs](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_json.html)). These are some examples of the formats it accept:
+
+*Example 1 (all arrays must have the same size)*:
+
+```json
+{
+  "column_1": ["data_row_1", "data_row_2", "data_row_3"],
+  "column_2": ["data_row_1", "data_row_2", "data_row_3"],
+  ...
+}
+```
+
+*Example 2*:
+
+```json
+[
+  {
+    "column_1": "data_row_1",
+    "column_2": "data_row_1",
+    "column_3": "data_row_1",
+  },
+  {
+    "column_1": "data_row_2",
+    "column_3": "data_row_2"
+  }
+  ...
+]
+```
+
+
+#### Download From Google Drive
+
+
+#### Redash
+
+

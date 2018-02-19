@@ -161,9 +161,10 @@ requiridos:
   - results: Listado de configuraciones de como guardar el resultado ([Documentación de resultados](#Results)).
   - Set de campos que pueden ser requeridos u opcionales que se detallan más abajo.
 
+
 #### Query
 
-`type: query`. Este tipo de reporte corre una query contra la base de datos.
+`type: query`. Este tipo de reporte corre una query contra la base de datos. Debería funcionar con cualquier base de datos soportada por Sqlalchemy, pero por ahora solo está probada con PostgreSQL.
 Las configuraciones necesarias son:
 
   - query_file: el archivo que contiene el código de la query (plano).
@@ -177,7 +178,7 @@ Ejemplo de un reporte de tipo query:
 {
   "name": "my_shiny_query",
   "type": "query",
-  "query_file": "query.sql",
+  "query_file": "/my/dir/query.sql",
   "connection": "local",
   "variables": {
     "foo": "bar"
@@ -186,38 +187,12 @@ Ejemplo de un reporte de tipo query:
 }
 ```
 
-#### Redash
-
-`type: redash`. Este reporte se conecta a la API de redash y toma los datos
-actuales de la query especificada. Sus configuraciones son:
-
-  - redash_url: la url de redash, a cuya API se va a comunicar.
-  - query_id: el identificador de la query a usar. Es la última parte de la url
-  de la query (por ejemplo: en `https://some.redash.com/queries/67`, 67 es el
-  id de la query)
-  - api_key: el token para acceder a la query. Existen 2 tipos: api key de query
-  y de usuario. El de la query se puede encontrar yendo a la página de la query
-  y presionando el botón con el ícono de llave (al lado de *Download Dataset*).
-  El de usuario se puede encontrar en el perfil.
-
-Ejemplo de una query redash:
-
-```json
-{
-  "name": "some_redash_query",
-  "type": "redash",
-  "api_key": "some api key",
-  "query_id": "123",
-  "redash_url": "https://some.redash.com",
-  "results": [...]
-}
-```
 
 #### Bash Script
 
 `type: bash`. Este reporte, ejecuta un comando bash y toma lo que imprime por consola.
-Como analogia para entender, utiliza el PIPE de unix para redirigir todos los outputs del script,
-y levantarlos como resultado de una query. Ej:
+Se puede interpretar este reporte como la parte de `read_output` del siguiente ejemplo:
+
 ```bash
 $ bash_script | read_output
 ```
@@ -225,7 +200,7 @@ $ bash_script | read_output
 
 Sus configuraciones son:
 
-  - script: el comando a ejecutar para obtener el resultado.
+  - script: el comando a ejecutar.
   - script_file: el archivo que contiene el código bash. Este campo se ignora
   si *script* está definido
   - result_type: el tipo de formato que van a tener los datos entrantes. Puede
@@ -233,7 +208,7 @@ Sus configuraciones son:
   por el script no se va a procesar y se va a enviar directamente a los
   resultados. El formato de json que se espera está explicado [más abajo](#bash-script-json)
 
-Ejemplo de una query json:
+Ejemplo de un reporte bash:
 
 ```json
 {
@@ -245,30 +220,22 @@ Ejemplo de una query json:
 }
 ```
 
-##### Bash Script - JSON
 
-El formato del json puede ser de dos tipos:
+##### Bash Script json format
 
-Pasanrle un objeto, especificando la columna como key y pasandole como value
-un array con los datos para cada fila.
-** Nota: ** Requerido que todos los arrays tengan el mismo tamaño
+Los datos json se van a convertir en un dataframe de pandas con la función `pd.read_json` ([Docs](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.read_json.html)). A continuación algunos ejemplos de los datos que acepta:
+
+*Ejemplo 1 (los arrays deben tener el mismo tamaño)*:
 
 ```json
 {
   "column_1": ["data_row_1", "data_row_2", "data_row_3"],
   "column_2": ["data_row_1", "data_row_2", "data_row_3"],
-  "column_3": ["data_row_1", "data_row_2", "data_row_3"],
-  "column_4": ["data_row_1", "data_row_2", "data_row_3"]
+  ...
 }
 ```
 
-Pasandole un array de Filas, la cual cada Fila, va a ser un objeto.
-Cada key del objeto Fila, va a ser el nombre de la columna y su value será
-el dato para esa fila y columna.
-
-**Nota:** A diferencia del formato anterior, no es necesario que todas las filas
-tengan la misma cantidad de columnas. Las filas que no definan un valor para una columna,
-quedaran vacias.
+*Ejemplo 2*:
 
 ```json
 [
@@ -279,83 +246,12 @@ quedaran vacias.
   },
   {
     "column_1": "data_row_2",
-    "column_3": "data_row_2",
-  },
-  {
-    "column_1": "data_row_3",
-    "column_2": "data_row_3",
-    "column_4": "data_row_3",
-  },
-  {
-    "column_1": "data_row_4",
-    "column_2": "data_row_4",
-    "column_3": "data_row_4",
-    "column_4": "data_row_4",
+    "column_3": "data_row_2"
   }
+  ...
 ]
 ```
 
-
-#### Adwords
-
-
-`type: adwords`. Este reporte se genera de la API de adwords de google. Se hace uso de la biblioteca [googleads](https://github.com/googleads/googleads-python-lib/). Sus configuraciones son:
-
-  - profile: El perfil con las credenciales a usar. El archivo de credenciales es un archivo .yaml, [en el tutorial de adwords](https://developers.google.com/adwords/api/docs/guides/start) se puede leer un poco más sobre este archivo.
-  - report_definition: La definición del reporte a descargar. Se pasa tal como está
-  definido al método [DownloadReport](http://googleads.github.io/googleads-python-lib/googleads.adwords.ReportDownloader-class.html#DownloadReport) de la api de googleads.
-  Suele definir los campos `reportName`, `dateRangeType`, `reportType`, `downloadFormat`,
-  `selector`, pero varian dependiendo del tipo del reporte.
-  - reportName: Para no repetir la definición del reporte, se puede especificar el
-  nombre del reporte y se va a utilizar el report_definition correspondiente al otro
-  reporte (debe ser el mismo que el especificado adentro del report_definition del
-  otro reporte).
-  - dateRangeType: si se utiliza el report_definition de otro reporte, se le puede
-  pisar la configuración del rango de fechas con este campo.
-  - [client_customer_id](https://support.google.com/adwords/answer/29198?hl=en):
-  El id o ids de customers, para los datos de los cuales se va a generar un reporte.
-  Puede ser un solo id como string, o una lista de ids.
-
-Ejemplo de una query adwords:
-
-```json
-{
-  "name": "some_adwords_report",
-  "type": "adwords",
-  "client_customer_id": "123-456-7890",
-  "report_definition": {
-    "reportName": "Shopping Performance Last Month",
-    "dateRangeType": "THIS_MONTH",
-    "reportType": "SHOPPING_PERFORMANCE_REPORT",
-    "downloadFormat": "CSV",
-    "selector": {
-        "fields": [
-            "AccountDescriptiveName",
-            "CampaignId",
-            "CampaignName",
-            "AdGroupName",
-            "AdGroupId",
-            "Clicks",
-            "Impressions",
-            "AverageCpc",
-            "Cost",
-            "ConvertedClicks",
-            "CrossDeviceConversions",
-            "SearchImpressionShare",
-            "SearchClickShare",
-            "CustomAttribute1",
-            "CustomAttribute2",
-            "Brand"
-        ]
-    }
-  },
-  "results": [...]
-}
-```
-
-#### Facebook Insights
-
-TODO: document
 
 #### Download From Google Drive
 
@@ -426,6 +322,94 @@ Ejemplo de un reporte a descargar de s3:
   "results": [...]
 }
 ```
+
+#### Redash
+
+`type: redash`. Este reporte se conecta a la API de redash y toma los datos
+actuales de la query especificada. Sus configuraciones son:
+
+  - redash_url: la url de redash, a cuya API se va a comunicar.
+  - query_id: el identificador de la query a usar. Es la última parte de la url
+  de la query (por ejemplo: en `https://some.redash.com/queries/67`, 67 es el
+  id de la query)
+  - api_key: el token para acceder a la query. Existen 2 tipos: api key de query
+  y de usuario. El de la query se puede encontrar yendo a la página de la query
+  y presionando el botón con el ícono de llave (al lado de *Download Dataset*).
+  El de usuario se puede encontrar en el perfil.
+
+Ejemplo de una query redash:
+
+```json
+{
+  "name": "some_redash_query",
+  "type": "redash",
+  "api_key": "some api key",
+  "query_id": "123",
+  "redash_url": "https://some.redash.com",
+  "results": [...]
+}
+```
+
+#### Adwords
+
+
+`type: adwords`. Este reporte se genera de la API de adwords de google. Se hace uso de la biblioteca [googleads](https://github.com/googleads/googleads-python-lib/). Sus configuraciones son:
+
+  - profile: El perfil con las credenciales a usar. El archivo de credenciales es un archivo .yaml, [en el tutorial de adwords](https://developers.google.com/adwords/api/docs/guides/start) se puede leer un poco más sobre este archivo.
+  - report_definition: La definición del reporte a descargar. Se pasa tal como está
+  definido al método [DownloadReport](http://googleads.github.io/googleads-python-lib/googleads.adwords.ReportDownloader-class.html#DownloadReport) de la api de googleads.
+  Suele definir los campos `reportName`, `dateRangeType`, `reportType`, `downloadFormat`,
+  `selector`, pero varian dependiendo del tipo del reporte.
+  - reportName: Para no repetir la definición del reporte, se puede especificar el
+  nombre del reporte y se va a utilizar el report_definition correspondiente al otro
+  reporte (debe ser el mismo que el especificado adentro del report_definition del
+  otro reporte).
+  - dateRangeType: si se utiliza el report_definition de otro reporte, se le puede
+  pisar la configuración del rango de fechas con este campo.
+  - [client_customer_id](https://support.google.com/adwords/answer/29198?hl=en):
+  El id o ids de customers, para los datos de los cuales se va a generar un reporte.
+  Puede ser un solo id como string, o una lista de ids.
+
+Ejemplo de una query adwords:
+
+```json
+{
+  "name": "some_adwords_report",
+  "type": "adwords",
+  "client_customer_id": "123-456-7890",
+  "report_definition": {
+    "reportName": "Shopping Performance Last Month",
+    "dateRangeType": "THIS_MONTH",
+    "reportType": "SHOPPING_PERFORMANCE_REPORT",
+    "downloadFormat": "CSV",
+    "selector": {
+        "fields": [
+            "AccountDescriptiveName",
+            "CampaignId",
+            "CampaignName",
+            "AdGroupName",
+            "AdGroupId",
+            "Clicks",
+            "Impressions",
+            "AverageCpc",
+            "Cost",
+            "ConvertedClicks",
+            "CrossDeviceConversions",
+            "SearchImpressionShare",
+            "SearchClickShare",
+            "CustomAttribute1",
+            "CustomAttribute2",
+            "Brand"
+        ]
+    }
+  },
+  "results": [...]
+}
+```
+
+#### Facebook Insights
+
+TODO: document
 
 
 #### Module
