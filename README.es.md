@@ -162,6 +162,10 @@ requiridos:
   - Set de campos que pueden ser requeridos u opcionales que se detallan más abajo.
 
 
+#### File
+
+TODO: document
+
 #### Query
 
 `type: query`. Este tipo de reporte corre una query contra la base de datos. Debería funcionar con cualquier base de datos soportada por Sqlalchemy, pero por ahora solo está probada con PostgreSQL.
@@ -170,7 +174,7 @@ Las configuraciones necesarias son:
   - query_file: el archivo que contiene el código de la query (plano).
   - connection: el nombre de la conección a utilizar
   - variables: es un diccionario con valores a reemplazar en la query. Cómo
-  funciona es explicado en [Parametrizando reportes](#parametrizando-reportes).
+  funciona es explicado en [Parametrizando queries](#parametrizando-queries).
 
 Ejemplo de un reporte de tipo query:
 
@@ -259,7 +263,7 @@ Los datos json se van a convertir en un dataframe de pandas con la función `pd.
 
   Configuración:
 
-  - profile: El perfil a utilizar. Las credenciales de este perfil tendrán que ser
+  - profile: Nombre del perfil a utilizar. Las credenciales de este perfil tendrán que ser
   las de una cuenta de servicio con acceso a la API de Google Drive.
   - grant: Email del usuario, es el nombre de quien se va a descargar el documento.
   Tiene que tener el acceso al folder especificado.
@@ -267,8 +271,7 @@ Los datos json se van a convertir en un dataframe de pandas con la función `pd.
   - folder: En que directorio se encuentra el archivo a descargar.
   - folder_id: Evita confusiones con nombres repetidos, no es necesario especificar
   folder.
-  - subfolder: Parametro opcional. Busca una subfolder dentro de la folder especificada,
-  evita confusiones.
+  - subfolder: Parametro opcional. Busca una subfolder dentro de la folder especificada para buscar ahí el archivo. En otras palabras, busca esta estructura: `<folder>/<subfolder>/<filename>`.
   - file_id: id del archivo a descargar, no es necesario especifiar folders y filename.
 
 Ejemplo de un reporte Drive:
@@ -289,13 +292,11 @@ Ejemplo de un reporte Drive:
 
 #### Download From S3
 
-`type: s3`. Este reporte descarga un archivo de amazon s3. Para usar este
-reporte, es necesario instalar [boto3](http://boto3.readthedocs.io/en/latest/guide/quickstart.html#installation).
+`type: s3`. Este reporte descarga un archivo de Amazon S3. Para usar este reporte, es necesario instalar [boto3](http://boto3.readthedocs.io/en/latest/guide/quickstart.html#installation).
 
 Configuración:
 
-  - profile: El perfil a utilizar. Es el perfil de reporter, no confundir con
-  los perfiles de amazon. El archivo, específicado en credentials tendrá
+  - profile: El perfil a utilizar. Es el perfil de reporter, no confundir con los perfiles de amazon. El archivo, específicado en credentials tendrá
   que contener datos para pasarle al constructor de [Session](http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session). Ejemplo de un
   archivo de credenciales de s3 mínimo:
 
@@ -325,16 +326,14 @@ Ejemplo de un reporte a descargar de s3:
 
 #### Redash
 
-`type: redash`. Este reporte se conecta a la API de redash y toma los datos
-actuales de la query especificada. Sus configuraciones son:
+`type: redash`. Este reporte descarga los resultados de la query de la API de [redash](https://redash.io/). Sus configuraciones son:
 
   - redash_url: la url de redash, a cuya API se va a comunicar.
   - query_id: el identificador de la query a usar. Es la última parte de la url
   de la query (por ejemplo: en `https://some.redash.com/queries/67`, 67 es el
   id de la query)
   - api_key: el token para acceder a la query. Existen 2 tipos: api key de query
-  y de usuario. El de la query se puede encontrar yendo a la página de la query
-  y presionando el botón con el ícono de llave (al lado de *Download Dataset*).
+  y de usuario. El token de la query se puede encontrar en la página de las fuentes de la query.
   El de usuario se puede encontrar en el perfil.
 
 Ejemplo de una query redash:
@@ -357,9 +356,7 @@ Ejemplo de una query redash:
 
   - profile: El perfil con las credenciales a usar. El archivo de credenciales es un archivo .yaml, [en el tutorial de adwords](https://developers.google.com/adwords/api/docs/guides/start) se puede leer un poco más sobre este archivo.
   - report_definition: La definición del reporte a descargar. Se pasa tal como está
-  definido al método [DownloadReport](http://googleads.github.io/googleads-python-lib/googleads.adwords.ReportDownloader-class.html#DownloadReport) de la api de googleads.
-  Suele definir los campos `reportName`, `dateRangeType`, `reportType`, `downloadFormat`,
-  `selector`, pero varian dependiendo del tipo del reporte.
+  definido al método [DownloadReport](http://googleads.github.io/googleads-python-lib/googleads.adwords.ReportDownloader-class.html#DownloadReport) de la api de googleads. Suele definir los campos `reportName`, `dateRangeType`, `reportType`, `downloadFormat`, `selector`, pero varian dependiendo del tipo del reporte.
   - reportName: Para no repetir la definición del reporte, se puede especificar el
   nombre del reporte y se va a utilizar el report_definition correspondiente al otro
   reporte (debe ser el mismo que el especificado adentro del report_definition del
@@ -419,15 +416,13 @@ TODO: document
 
 ### Results
 
-Los resultados se definen para cada reporte en un listado. Cada result en esa lista tiene que ser un objeto con el campo *type* definido, el resto de los campos depende de ese tipo.
+Los resultados se definen para cada reporte en un listado. Cada result en esa lista tiene que ser un objeto con el campo *type* definido, el resto de los campos depende de ese tipo. A continuación se detallan todos los resultados soportados.
 
 #### File
 
-`type: file`. Guardar el resultado del reporte en un archivo. Las configuraciones
-de este Result son:
+`type: file`. Guardar el resultado del reporte en un archivo. Las configuraciones de este result son:
 
-  - filename: El nombre de archivo resultante. Si tiene extensiones `xls` o `xlsx`,
-  se guardará en formato Excel, sino se va a guardar como csv.
+  - filename: Ruta al archivo resultante. Dependiendo de la extensión, el archivo se va a guardar en formato Excel (`xls` o `xlsx`), tsv o csv.
 
 Ejemplo de un resultado File:
 
@@ -443,18 +438,16 @@ Ejemplo de un resultado File:
 `type: email`. Enviar el resultado del reporte como archivo adjunto por email.
 Las configuraciones son:
 
-  - profile: El perfil con credenciales a utilizar. Las credenciales tienen que
-  tener el usuario y la contraseña del servicio smtp a utilizar (campos
-  `username` y `password`).
-  - connection: Una conección de tipo email.
+  - connection: Nombre de una conección de tipo *email*.
+  - profile: El perfil con credenciales a utilizar. Las credenciales tienen que tener el usuario y la contraseña del servicio smtp a utilizar (campos `username` y `password`).
   - filename: El nombre del archivo a adjuntar.
   - recipients: El o los receptores del email. Puede ser string con un receptor
   o lista de strings con varios. Este campo es obligatorio.
   - subject: El tema del email.
-  - body: El texto del email. Se puede formatear igual que el filename (Ver la sección [Parametrizando el nombre del archivo](#parametrizando-el-nombre-del-archivo))
+  - body: El texto del email.
   - attachments: Lista de archivos para attachear al emails. Deben ser rutas a archivos.
 
-Ejemplo de un resultado Email:
+ Subject y body se pueden formatear igual que el filename (Ver la sección [Parametrizando el nombre del archivo](#parametrizando-el-nombre-del-archivo)). Ejemplo de un resultado Email:
 
 ```json
 {
@@ -470,16 +463,15 @@ Ejemplo de un resultado Email:
 
 #### Ftp
 
-`type: ftp`. Subir el resultado del reporte a un servidor ftp..
+`type: ftp`. Permite subir el resultado del reporte a un servidor ftp.
 Las configuraciones son:
 
-  - profile: El perfil con credenciales a utilizar. Las credenciales tienen que
-  tener el usuario y la contraseña del servicio ftp a utilizar (campos
+  - profile: El perfil con credenciales a utilizar. Las credenciales tienen que tener el usuario y la contraseña del servicio ftp a utilizar (campos
   `username` y `password`).
   - connection: Una conección de tipo ftp.
-  - filename: El nombre del archivo a adjuntar.
+  - filename: Nombre con el que el archivo se va a subir.
 
-Ejemplo de un resultado Email:
+Ejemplo de un resultado ftp:
 
 ```json
 {
@@ -492,22 +484,14 @@ Ejemplo de un resultado Email:
 
 #### Drive
 
-`type: drive`. Guarda el resultado del reporte en Google Drive.
+`type: drive`. Guarda el resultado del reporte en Google Drive. Estas son las configuraciones:
 
-  Estas son las configuraciones:
-
-  - profile: El perfil a utilizar. Las credenciales de este perfil tendrán que ser
+  - profile: El nombre del perfil a utilizar. Las credenciales de este perfil tendrán que ser
   las de una cuenta de servicio con acceso a la API de Google Drive.
   - filename: El nombre de archivo resultante.
-  - folder: En qué directorio guardarlo, opcional. Si no se pasa, el reporte se
-  guardará en la raiz. El directorio tiene que existir. En el caso de existir dos
-  directorios con el mismo nombre, se guardará en el primero.
-  - folder_id: El id de directorio, en el cuál se guardará el archivo. Ese dato
-  evitará confusiones de nombre, que puede presentar el parametro anterior. El
-  id de la carpeta se puede obtener de la última parte de la url desde la interfaz
-  de google drive.
-  - grant: Email del usuario, en el nombre de quien se va a guardar el documento.
-  Tiene que tener el acceso al folder especificado.
+  - folder: En qué directorio guardarlo, opcional. Si no se pasa, el reporte se guardará en la raiz. El directorio tiene que existir. En el caso de existir dos directorios con el mismo nombre, se guardará en el primero.
+  - folder_id: El id de directorio, en el cuál se guardará el archivo. Ese dato evitará confusiones de nombre, que puede presentar el parametro anterior. El id de la carpeta se puede obtener de la última parte de la url desde la interfaz de google drive.
+  - grant: Email del usuario, en el nombre de quien se va a guardar el documento. Tiene que tener el acceso al folder especificado.
 
 Ejemplo de un resultado Drive:
 
@@ -521,14 +505,51 @@ Ejemplo de un resultado Drive:
 }
 ```
 
+
+#### S3
+
+`type: s3`. Guarda el resultado en amazon s3. Para usar este reporte, es necesario instalar [boto3](http://boto3.readthedocs.io/en/latest/guide/quickstart.html#installation).
+
+Configuración:
+
+  - profile: El perfil a utilizar. Es el perfil de reporter, no confundir con
+  los perfiles de amazon. El archivo, específicado en credentials tendrá
+  que contener datos para pasarle al constructor de [Session](http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session). Ejemplo de un
+  archivo de credenciales de s3 mínimo:
+
+  ```json
+  {
+    "aws_access_key_id": "my key id",
+    "aws_secret_access_key": "my secret access key"
+  }
+  ```
+
+  - bucket: Bucket de s3 en el cual se va a guardar el archivo.
+  - filename: Nombre del archivo a guardar. Este dato es la *key* del archivo a escribir en el bucket.
+
+Ejemplo de un resultado s3:
+
+```json
+{
+  "type": "s3",
+  "profile": "my_aws_profile",
+  "bucket": "some.bucket",
+  "filename": "reports/custom_report.csv"
+}
+```
+
+
+#### Redash
+
+`type: redash`. Guarda el resultado del reporte como un archivo *json* que se puede servir a redash mediante una API. Redash lo puede consumir utilizando el datasource de url. En cuanto a la configuración, admite los mismos campos que el resultado [File](#file), con la excepción de que el archivo tiene que ser un json (siempre se va a guardar como json, independientemente de la extensión).
+
+
 #### Module
 
-`type: module`. Permite definir un archivo python con una clase de Resultado
-definida por el usuario. Estos son los campos que se requieren:
+`type: module`. Permite definir un modulo python con una clase de Resultado definida por el usuario. Ese modulo se va a cargar dinamicamente y ejecutar. Estos son los campos que se requieren:
 
   - result_file: El archivo con el resultado definido.
-  - result_class: La clase de resultado. Tiene que heredar de `Result` y
-  tener definido el método `save`. Ejemplo de una clase customizada:
+  - result_class: La clase de resultado. Tiene que heredar de `Result` y tener definido el método `save`. Ejemplo de una clase customizada:
 
     ```python
     from reports import Result
@@ -546,9 +567,9 @@ Notese que el resultado custom se va a ejecutar como cualquier otro resultado -
 se le va a pasar la configuración y las configuraciones del resultado, por ende
 es buena idea definir las configuraciones para el resultado creado.
 
-**Advertencia**: reporter va a cargar y ejecutar el archivo, y luego va a
-utilizar la clase del resultado, con todas los agujeros de seguridad que eso
-implica.
+**Advertencia**: reporter va a cargar y ejecutar el archivo, y luego va a utilizar la clase del resultado, con todas los agujeros de seguridad que eso implica. Siempre verifique el código custom antes de usarlos.
+
+Ejemplo de definición de un resultado module:
 
 ```json
 {
@@ -560,62 +581,14 @@ implica.
 ```
 
 
-#### Redash
-
-`type: redash`. Guarda el resultado del reporte como un archivo *json* que se
-puede servir a redash mediante una API. Redash lo puede consumir utilizando el
-datasource de url. En cuanto a la configuración, admite los mismos campos que
-el resultado [File](#file), con la excepción de que el archivo tiene que ser un
-json (siempre se va a guardar como json, independientemente de la extensión).
-
-
-#### S3
-
-`type: s3`. Guarda el resultado en amazon s3. Para usar este
-reporte, es necesario instalar [boto3](http://boto3.readthedocs.io/en/latest/guide/quickstart.html#installation).
-
-Configuración:
-
-  - profile: El perfil a utilizar. Es el perfil de reporter, no confundir con
-  los perfiles de amazon. El archivo, específicado en credentials tendrá
-  que contener datos para pasarle al constructor de [Session](http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session). Ejemplo de un
-  archivo de credenciales de s3 mínimo:
-
-  ```json
-  {
-    "aws_access_key_id": "my key id",
-    "aws_secret_access_key": "my secret access key"
-  }
-  ```
-
-  - bucket: Bucket de s3 en el cual se va a guardar el archivo.
-  - filename: Nombre del archivo a guardar. Este dato es la *key* del archivo a
-  escribir en el bucket.
-
-Ejemplo de un resultado escrito s3:
-
-```json
-{
-  "type": "s3",
-  "profile": "my_aws_profile",
-  "bucket": "some.bucket",
-  "filename": "reports/custom_report.csv"
-}
-```
-
-
 ### Configuración global
 
-Además de reportes, conecciones y perfiles se permiten configurar algunos datos
-estáticos:
+Además de reportes, conecciones y perfiles se permiten configurar algunos datos estáticos:
 
-  - timezone: la string del timezone a usar. Por defecto todas las fechas se
-  generan en utc. Esta configuración puede ser reescrita para cada reporte
+  - timezone: la string del timezone a usar. Por defecto todas las fechas se generan en utc. Esta configuración puede ser reescrita para cada reporte
   particular.
 
-  - pwd: el directorio por defecto desde el cual reporter va a leer los archivos
-  de querys y guardar los resultados (en el caso de que se especifiquen con ruta
-  relativa).
+  - pwd: el directorio por defecto desde el cual reports va a leer los archivos de querys y guardar los resultados (en el caso de que se especifiquen con ruta relativa).
 
 
 ## Parametrizando reportes
@@ -632,8 +605,7 @@ reports va a reemplazar esas variables por (suponiendo que estamos en Febrero de
 select * from some_table where date >= '2016-02-01 00:00:00' and date < '2016-03-01 00:00:00'
 ```
 
-Las fechas por defecto son UTC, esto se puede modificar en la configuración
-`timezone` global o para cada reporte particular.
+Las fechas por defecto son UTC, esto se puede modificar en la configuración `timezone` global o para cada reporte particular.
 
 Todas las variables que se pueden utilizar:
 
@@ -645,9 +617,7 @@ Todas las variables que se pueden utilizar:
   - `{M}`: el comienzo del minuto
   - `{w}`: el comienzo de la semana (Lunes)
 
-A estas variables se les pueden agregar modificadores. Las expresiones con
-modificadores siempre tienen que comenzar con alguna de las variables anteriores,
-seguir con un signo (`+` o `-`), un número y terminar con la magnitud. Las magnitudes
+A estas variables se les pueden agregar modificadores. Las expresiones con modificadores siempre tienen que comenzar con alguna de las variables anteriores, seguir con un signo (`+` o `-`), un número y terminar con la magnitud. Las magnitudes
 aceptadas son:
 
   - `{y}`: años
@@ -660,23 +630,51 @@ aceptadas son:
 Por ejemplo:
 
 ```
-{now}, {now-1d}, {now+1y}, {now+15h}, {t-3m}
+{now}
+{now-1d}
+{now+1y}
+{now+15h}
+{t-3m}
 ```
 
 Resulta en:
 
 ```
-2016-02-12 18:19:09, 2016-02-11 18:19:09, 2017-02-12 18:19:09, 2016-02-13 09:19:09, 2015-11-12 00:00:00
+2016-02-12 18:19:09
+2016-02-11 18:19:09
+2017-02-12 18:19:09
+2016-02-13 09:19:09
+2015-11-12 00:00:00
 ```
 
-Otra pisbilidad es especificar un día de la semana:
+Otra posbilidad es especificar comienzo de la semana con `{f}`. Por ejemplo `{d-1f}` moverá la fecha al Lunes de la semana actual y `{d+2f}` moverá la fecha al Lunes dentro de 2 semanas.
 
-  - `{f}`: Mueve la fecha una cantidad de Lunes. Por ejemplo, {d-1f} moverá la
-  fecha al Lunes actual y {d+2f} moverá la fecha al Lunes dentro de 2 semanas.
 
-Si el reporte tiene un diccionario de variables especificado, estas se reemplazan
-de la misma forma, previo al reemplazo de fechas. Por ejemplo, si tenemos
-las siguientes variables:
+### Parametrizando queries
+
+Si el reporte tiene un diccionario de variables especificado, estas se reemplazarán en el archivo de queries especificado. Por ejemplo, si se define esta query:
+
+```sql
+select something from some_table where type = '{my_type}'
+```
+
+Se le podrá cambiar la variable en la configuración de la siguiente forma:
+
+```json
+{
+  "variables": {
+    "my_type": "some custom type"
+  }
+}
+```
+
+La query que se va a terminar ejecutando es la siguiente:
+
+```sql
+select something from some_table where type = 'some custom type'
+```
+
+Estas variables se van a reemplazar previo al reemplazo de fechas. Esto permite definir variable de esta forma:
 
 ```json
 {
@@ -688,19 +686,19 @@ las siguientes variables:
 
 Entonces `{yesterday}` resultará en `2016-02-12 17:19:09`
 
-
 ### Parametrizando el nombre del archivo
 
-Los reportes `file` y `drive` toman como parámetro el nombre del archivo. Este
-nombre se puede formatear de la misma forma. Por ejemplo, si se define:
+Todas las configuraciones `filename` en los reportes y resultados se pueden parametrizar de una manera similar a la de arriba. Por ejemplo, si se define:
 
 ```json
-{"filename": "report_{Y}-{m}"}
+{
+  "filename": "report_{Y}-{m}"
+}
 ```
 
 El nombre resultante será `report_2016-02` (Asumiendo que se corrió en Febrero del 2016).
 
-Se puede usar los mismos modificadores que para el reporte. Por ejemplo:
+Se puede usar los mismos modificadores que para las queries. Por ejemplo:
 
 ```json
 {"filename": "report_{Y}-{m-1m}"}
@@ -715,16 +713,9 @@ Para correr los tests, hay que instalar las dependencias de test:
 
 TODO: document this
 
-Luego, hace falta estar en el directorio de reporter:
+Los test se ejecutan desde el directorio de reporter:
 
 ```bash
 $ cd path/to/reporter
-```
-
-y ejecutar la siguiente linea:
-
-```bash
 $ python -m unittest discover
 ```
-
-
