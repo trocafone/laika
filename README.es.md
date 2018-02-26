@@ -1,7 +1,7 @@
 
-# Reports
+# Laika
 
-*reports* es una bibliotéca que sirve para generar reportes y guardarlos en
+*laika* es una bibliotéca que sirve para generar reportes y guardarlos en
 un formato específico y en un lugar específico. Por ejemplo: se le puede especificar
 un reporte con datos tomados de una base de datos y que se guarde en Google Drive.
 
@@ -16,40 +16,41 @@ TODO
 La herramienta se utiliza desde la línea de comando de la siguiente forma:
 
 ```bash
-$ ./reporter.py some_report
+$ laika.py some_report
 ```
+
 Este comando correrá el reporte definido con el nombre *some_report*.
 
 
 Se le puede pasar el archivo de configuración a usar por parámetro.
 
 ```bash
-$ ./reporter.py -c my_config.json
+$ laika.py -c my_config.json
 ```
 
 Tambien la ruta al archivo de configuración se puede guardar en la variable de
-entorno `REPORTER_CONFIG_FILE_PATH`.
+entorno `LAIKA_CONFIG_FILE_PATH`.
 
 ```bash
-$ export REPORTER_CONFIG_FILE='/home/me/my_config.json'
-./reporter.py my_report
+$ export LAIKA_CONFIG_FILE_PATH='/home/me/my_config.json'
+$ laika.py my_report
 ```
 
 Otro parámetro que se le puede pasar es `--pwd` para especificar el directorio
 de trabajo. Tambien se puede especificar en el archivo de configuración o la
-variable de entorno `REPORTER_PWD`.
+variable de entorno `LAIKA_PWD`.
 
 ### Argumentos
 
 Todos los arguments definidos en el reporte se pueden ver usando `--help` flag.
 
-Los argumentos que no estén definidos por el reporter se van a agregar a la
+Los argumentos que no estén predefinidos por `laika.py se van a agregar a la
 configuración del reporte, y sobreescribirán la misma. De esta forma si, por
 ejemplo, la configuración de un reporte `my_report` define un campo `my_field` con
 un valor `foo`, si se lo llama de la siguiente forma:
 
 ```bash
-$ ./reporter.py my_report --my_field bar
+$ laika.py my_report --my_field bar
 ```
 
 La configuración `my_field` tendrá el valor `bar` a la hora de ejecutarlo.
@@ -57,7 +58,7 @@ La configuración `my_field` tendrá el valor `bar` a la hora de ejecutarlo.
 
 ## Configuración
 
-Reporter toma los reportes posibles desde un archivo en formato json. Este archivo tiene que tener la siguiente estructura:
+Laika toma los reportes posibles desde un archivo en formato json. Este archivo tiene que tener la siguiente estructura:
 
 ```json
 {
@@ -296,7 +297,7 @@ Ejemplo de un reporte Drive:
 
 Configuración:
 
-  - profile: El perfil a utilizar. Es el perfil de reporter, no confundir con los perfiles de amazon. El archivo, específicado en credentials tendrá
+  - profile: El perfil a utilizar. Es el perfil de laika, no confundir con los perfiles de amazon. El archivo, específicado en credentials tendrá
   que contener datos para pasarle al constructor de [Session](http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session). Ejemplo de un
   archivo de credenciales de s3 mínimo:
 
@@ -512,7 +513,7 @@ Ejemplo de un resultado Drive:
 
 Configuración:
 
-  - profile: El perfil a utilizar. Es el perfil de reporter, no confundir con
+  - profile: El perfil a utilizar. Es el perfil de laika, no confundir con
   los perfiles de amazon. El archivo, específicado en credentials tendrá
   que contener datos para pasarle al constructor de [Session](http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session). Ejemplo de un
   archivo de credenciales de s3 mínimo:
@@ -552,7 +553,7 @@ Ejemplo de un resultado s3:
   - result_class: La clase de resultado. Tiene que heredar de `Result` y tener definido el método `save`. Ejemplo de una clase customizada:
 
     ```python
-    from reports import Result
+    from laika.reports import Result
 
     class FooResult(Result):
 
@@ -567,7 +568,7 @@ Notese que el resultado custom se va a ejecutar como cualquier otro resultado -
 se le va a pasar la configuración y las configuraciones del resultado, por ende
 es buena idea definir las configuraciones para el resultado creado.
 
-**Advertencia**: reporter va a cargar y ejecutar el archivo, y luego va a utilizar la clase del resultado, con todas los agujeros de seguridad que eso implica. Siempre verifique el código custom antes de usarlos.
+**Advertencia**: laika va a cargar y ejecutar el archivo, y luego va a utilizar la clase del resultado, con todas los agujeros de seguridad que eso implica. Siempre verifique el código custom antes de usarlos.
 
 Ejemplo de definición de un resultado module:
 
@@ -588,7 +589,7 @@ Además de reportes, conecciones y perfiles se permiten configurar algunos datos
   - timezone: la string del timezone a usar. Por defecto todas las fechas se generan en utc. Esta configuración puede ser reescrita para cada reporte
   particular.
 
-  - pwd: el directorio por defecto desde el cual reports va a leer los archivos de querys y guardar los resultados (en el caso de que se especifiquen con ruta relativa).
+  - pwd: el directorio por defecto desde el cual laika va a leer los archivos de querys y guardar los resultados (en el caso de que se especifiquen con ruta relativa).
 
 
 ## Parametrizando reportes
@@ -599,7 +600,7 @@ En la definición de una query (u otras templates formateables) se pueden especi
 select * from some_table where date >= '{m}' and date < '{m+1m}'
 ```
 
-reports va a reemplazar esas variables por (suponiendo que estamos en Febrero del 2016):
+laika va a reemplazar esas variables por (suponiendo que estamos en Febrero del 2016):
 
 ```sql
 select * from some_table where date >= '2016-02-01 00:00:00' and date < '2016-03-01 00:00:00'
@@ -713,9 +714,9 @@ Para correr los tests, hay que instalar las dependencias de test:
 
 TODO: document this
 
-Los test se ejecutan desde el directorio de reporter:
+Los test se ejecutan desde el directorio de laika:
 
 ```bash
-$ cd path/to/reporter
+$ cd path/to/laika
 $ python -m unittest discover
 ```

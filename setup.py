@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 _version_re = re.compile(r'__version__\s+=\s+(.*)')
 
 
-with open('reports/__init__.py', 'rb') as f:
+with open('laika/__init__.py', 'rb') as f:
     version = str(ast.literal_eval(_version_re.search(
         f.read().decode('utf-8')).group(1)))
 
@@ -15,11 +15,11 @@ with open('requirements.txt') as f:
 
 
 setup(
-    name='reports',
+    name='laika',
     author='Seva Gavrilov',
     author_email='gavrilovseva@gmail.com',
     version=version,
-    url='https://github.com/trocafone/etls/tree/master/reporter',
+    url='https://github.com/trocafone/reports',
     packages=find_packages(),
     description='A simple business reporting system',
     install_requires=requirements,
@@ -35,5 +35,5 @@ setup(
         'query': ['SQLAlchemy==1.0.11'],
         'postgres': ['psycopg2==2.6.1']
     },
-    scripts=['reporter.py']
+    scripts=['laika.py']
 )

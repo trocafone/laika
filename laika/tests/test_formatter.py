@@ -3,14 +3,14 @@ from datetime import datetime
 from mock import patch, Mock
 from unittest import TestCase
 
-from reports import ReportFormatter, FilenameFormatter
+from laika.reports import ReportFormatter, FilenameFormatter
 
 
 class ReportFormatterTest(TestCase):
 
     def setUp(self):
         now = datetime(2016, 02, 12, 18, 19, 9)
-        self._p_now = patch('reports.ReportFormatter.get_now', Mock(return_value=now)).start()
+        self._p_now = patch('laika.reports.ReportFormatter.get_now', Mock(return_value=now)).start()
         self.formatter = ReportFormatter({})
 
     def tearDown(self):
@@ -42,7 +42,7 @@ class FilenameFormatterTest(TestCase):
 
     def setUp(self):
         now = datetime(2016, 02, 12, 18, 19, 9)
-        self._p_now = patch('reports.ReportFormatter.get_now', Mock(return_value=now)).start()
+        self._p_now = patch('laika.reports.ReportFormatter.get_now', Mock(return_value=now)).start()
         self.formatter = FilenameFormatter({})
 
     def tearDown(self):

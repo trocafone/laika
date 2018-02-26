@@ -6,11 +6,11 @@ import logging
 import os
 import sys
 
-from reports import Config, Runner
+from laika.reports import Config, Runner
 
 
-ENV_REPORTER_CONFIG = 'REPORTER_CONFIG_FILE_PATH'
-ENV_REPORTER_PWD = 'REPORTER_PWD'
+ENV_LAIKA_CONFIG = 'LAIKA_CONFIG_FILE_PATH'
+ENV_LAIKA_PWD = 'LAIKA_PWD'
 
 
 @click.command('run', short_help='runs the report', context_settings=dict(
@@ -33,11 +33,11 @@ def run(ctx, report, run_all, config, show_list, loglevel, pwd):
     """
 
     current_path = os.path.dirname(os.path.realpath(__file__))
-    config = config or os.environ.get(ENV_REPORTER_CONFIG) or current_path + '/config.json'
+    config = config or os.environ.get(ENV_LAIKA_CONFIG) or current_path + '/config.json'
     logging.basicConfig(format='[%(asctime)s] %(name)s:%(levelname)s - %(message)s',
                         stream=sys.stdout, level=getattr(logging, loglevel), datefmt='%Y-%m-%d %H:%M:%S')
 
-    pwd = pwd or os.environ.get(ENV_REPORTER_PWD) or current_path
+    pwd = pwd or os.environ.get(ENV_LAIKA_PWD) or current_path
     conf = Config(config, pwd)
 
     if show_list:

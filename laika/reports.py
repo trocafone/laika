@@ -32,11 +32,11 @@ class ReportError(Exception):
     """ An exception to denote that report generation failed """
 
 
-def get_json_credentials(reporter_object):
+def get_json_credentials(laika_object):
     """
     Returns parsed content of credentials file for a given report or result.
     """
-    profile = reporter_object.conf['profiles'][reporter_object.profile]
+    profile = laika_object.conf['profiles'][laika_object.profile]
     with open(profile['credentials']) as f:
         data = json.load(f)
     return data

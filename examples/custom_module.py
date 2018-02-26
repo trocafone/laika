@@ -1,5 +1,5 @@
 
-from reports import Result, BasicReport
+from laika.reports import Result, BasicReport
 
 
 class BarReport(BasicReport):

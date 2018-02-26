@@ -3,10 +3,10 @@ import pandas as pd
 from mock import patch, MagicMock
 from unittest import TestCase
 
-from reports import Config, Runner
+from laika.reports import Config, Runner
 
 
-class ReporterTest(TestCase):
+class LaikaTest(TestCase):
     """ Integration test for reporter components. """
 
     def setUp(self):

@@ -1,6 +1,6 @@
-# Reports
+# Laika
 
-*reports* is a business reporting library that allows you to request data from different sources and send it to someone as or save it at some destination. For example: you can query your database, send the result as an excel attachment via email and save it on Google Drive or Amazon S3.
+*laika* is a business reporting library that allows you to request data from different sources and send it to someone as or save it at some destination. For example: you can query your database, send the result as an excel attachment via email and save it on Google Drive or Amazon S3.
 
 TODO: document what it is and what it is not
 
@@ -10,35 +10,35 @@ TODO: document this
 
 ## Usage
 
-Reporter is a script that lets you use reports library. You can run it like this:
+`laika.py` is a script that lets you use laika library. You can run it like this:
 
 ```bash
-$ reporter.py some_report
+$ laika.py some_report
 ```
 
-This command will run the report named *some_report*. This report must be defined in some configuration file. By default reporter looks for `config.json` in the same directory. You can specify a custom config passing `-c` parameter:
+This command will run the report named *some_report*. This report must be defined in some configuration file. By default laika looks for `config.json` in the same directory. You can specify a custom config passing `-c` parameter:
 
 ```bash
-$ reporter.py -c my_config.json
+$ laika.py -c my_config.json
 ```
 
-Path to configuration file can also be specified with the `REPORTER_CONFIG_FILE_PATH` environment variable:
+Path to configuration file can also be specified with the `LAIKA_CONFIG_FILE_PATH` environment variable:
 
 ```bash
-$ export REPORTER_CONFIG_FILE='/home/me/my_config.json'
-./reporter.py my_report
+$ export LAIKA_CONFIG_FILE_PATH='/home/me/my_config.json'
+$ laika.py my_report
 ```
 
-Another parameter you can use is `--pwd` which server for specifying working directory. It can also be specified in configuration file or `REPORTER_PWD` environment variable.
+Another parameter you can use is `--pwd` which server for specifying working directory. It can also be specified in configuration file or `LAIKA_PWD` environment variable.
 
 ### Arguments
 
-You can check all the predefined reporter arguments with `--help`.
+You can check all the predefined `laika.py` arguments with `--help`.
 
-Undefined arguments will be added to reports definition overwriting default values. Thus, if for example the configuration for `my_report` defines field `my_field` with value `foo`, if you call it like this:
+Undefined arguments will be added to report's definition overwriting default values. Thus, if for example the configuration for `my_report` defines field `my_field` with value `foo`, if you call it like this:
 
 ```bash
-$ ./reporter.py my_report --my_field bar
+$ laika.py my_report --my_field bar
 ```
 
 `my_field` configuration will contain `bar` as value.
@@ -46,7 +46,7 @@ $ ./reporter.py my_report --my_field bar
 
 ## Configuration
 
-Reporter will read reports definition from a json file. The file must have this structure:
+Laika will read reports definition from a json file. The file must have this structure:
 
 ```json
 {
@@ -266,7 +266,7 @@ Example of a drive report:
 
 Configuration:
 
- - profile: Name of profile to use (reports, no to confuse with aws profiles). Credentials file of the specified profile must contain data to be passed to [Session](http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session) constructor. Example of a minimal aws credentials file for reports:
+ - profile: Name of profile to use (laika profile, no to confuse with aws profiles). Credentials file of the specified profile must contain data to be passed to [Session](http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session) constructor. Example of a minimal aws credentials file for laika:
 
   ```json
   {
@@ -471,7 +471,7 @@ Configuration:
 
 Configuration:
 
- - profile: Name of profile to use (reports, no to confuse with aws profiles). Credentials file of the specified profile must contain data to be passed to [Session](http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session) constructor. Example of a minimal aws credentials file for reports:
+ - profile: Name of profile to use (laika profile, no to confuse with aws profiles). Credentials file of the specified profile must contain data to be passed to [Session](http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session) constructor. Example of a minimal aws credentials file for laika:
 
   ```json
   {
@@ -510,7 +510,7 @@ Configuration:
  - result_class: Name of the class to use as result inside the python file. This class must inherit `Result` class and define `save` method. Simple example of a custom result class:
 
     ```python
-    from reports import Result
+    from laika.reports import Result
 
     class FooResult(Result):
 
@@ -543,17 +543,17 @@ In addition to reports, connections and profiles you can define this configurati
 
  - timezone: string of timezone to use. By default all the dates will be generated in UTC. You can overwrite it for each particular report.
 
- - pwd: directory, to which reports will change before executing reports. In this directory it will, for example, read query files, or save file results (if relative path is specified).
+ - pwd: directory, to which laika will change before executing reports. In this directory it will, for example, read query files, or save file results (if relative path is specified).
 
 ## Reports templating
 
-In query definitions (or other templates inside reports) you can specify dynamic dates this way:
+In query definitions (or other templates inside laika) you can specify dynamic dates this way:
 
 ```sql
 select * from some_table where date >= '{m}' and date < '{m+1m}'
 ```
 
-reports will replace this dates by (supposing current month is February of 2016):
+laika will replace this dates by (supposing current month is February of 2016):
 
 ```sql
 select * from some_table where date >= '2016-02-01 00:00:00' and date < '2016-03-01 00:00:00'
@@ -621,7 +621,7 @@ The query that will end up executing is this:
 select something from some_table where type = 'some custom type'
 ```
 
-These variables will be replaced first, and then reports will replace the dates, so you can define in your configuration variables like this:
+These variables will be replaced first, and then laika will replace the dates, so you can define in your configuration variables like this:
 
 ```json
 {
@@ -663,9 +663,9 @@ To run test, you must install test dependencies:
 
 TODO: document
 
-Then, run test from reports directory:
+Then, run test from laika directory:
 
 ```bash
-$ cd path/to/reports
+$ cd path/to/laika
 $ python -m unittest discover
 ```
