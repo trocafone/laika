@@ -68,6 +68,8 @@ The configuration can be separated in multiple files. You must have a base confi
 
 This files will be included in the configuration. The only constraint is they only can have `reports`, `connections` and `profiles` field defined.
 
+You can check the [example configuration file](config.json) for more information.
+
 ### Profiles
 
 Profiles are all kind of credentials used for accessing external APIs (like Google Drive). You must specify a name and a path to credentials for each profile. For example:
@@ -440,7 +442,7 @@ Example of ftp result:
 ```
 
 
-#### Drive
+#### Google Drive
 
 `type: drive`. Saves report data in Google Drive. These are the configurations:
 

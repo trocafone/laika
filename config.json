@@ -37,7 +37,7 @@
     {
       "name": "local",
       "type": "postgre",
-      "constring": "postgresql://trocafone:trocafone@database.trocafone.local:5432/trocafone"
+      "constring": "postgresql://user:pass@database.host.local:5432/some_db"
     },
     {
       "name": "gmail_smtp",

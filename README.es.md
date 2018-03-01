@@ -1,7 +1,7 @@
 
 # Laika
 
-*laika* es una bibliotéca que sirve para generar reportes y guardarlos en
+*laika* es una biblioteca que sirve para generar reportes y guardarlos en
 un formato específico y en un lugar específico. Por ejemplo: se le puede especificar
 un reporte con datos tomados de una base de datos y que se guarde en Google Drive.
 
@@ -84,6 +84,8 @@ un listado de archivos:
 Estos archivos se van a incluir en la configuración. La restricción que tienen
 es que solo pueden tener definidos campos `reports`, `connections` y `profiles`.
 
+Para más información, se puede mirar el [archivo de configuración de ejemplo](config.json).
+
 
 ### Profiles
 
@@ -110,13 +112,13 @@ depende de cada caso. Por ejemplo las credenciales de email pueden ser:
 
 ### Connections
 
-Connections son conecciones a fuentes de datos o destinos de resultados.
-Necesitan un *name*, un *type* y campos específicos de la conección. Las
-siguientes son las conecciones existentes.
+Connections son conexiones a fuentes de datos o destinos de resultados.
+Necesitan un *name*, un *type* y campos específicos de la conexión. Las
+siguientes son las conexiones existentes.
 
 #### Postgres
 
-Ejemplo de una conección a una base de datos PostgreSQL:
+Ejemplo de una conexión a una base de datos PostgreSQL:
 
 ```json
 {
@@ -128,7 +130,7 @@ Ejemplo de una conección a una base de datos PostgreSQL:
 
 #### Email
 
-Ejemplo de una conección email:
+Ejemplo de una conexión email:
 
 ```json
 {
@@ -141,7 +143,7 @@ Ejemplo de una conección email:
 
 #### Ftp
 
-Ejemplo de una conección ftp:
+Ejemplo de una conexión ftp:
 
 ```json
 {
@@ -155,7 +157,7 @@ Ejemplo de una conección ftp:
 ### Reportes
 
 Los reportes se especifican como objetos json, los siguientes campos son
-requiridos:
+requeridos:
 
   - name: El nombre del reporte, el cual luego se va a poder usar por línea de comando.
   - type: El tipo de reporte. Abajo se describen los tipos de reportes soportados.
@@ -173,7 +175,7 @@ TODO: document
 Las configuraciones necesarias son:
 
   - query_file: el archivo que contiene el código de la query (plano).
-  - connection: el nombre de la conección a utilizar
+  - connection: el nombre de la conexión a utilizar
   - variables: es un diccionario con valores a reemplazar en la query. Cómo
   funciona es explicado en [Parametrizando queries](#parametrizando-queries).
 
@@ -353,7 +355,7 @@ Ejemplo de una query redash:
 #### Adwords
 
 
-`type: adwords`. Este reporte se genera de la API de adwords de google. Se hace uso de la biblioteca [googleads](https://github.com/googleads/googleads-python-lib/). Sus configuraciones son:
+`type: adwords`. Este reporte se genera de la API de adwords de google. Se requiere tener instalada la biblioteca [googleads](https://github.com/googleads/googleads-python-lib/). Sus configuraciones son:
 
   - profile: El perfil con las credenciales a usar. El archivo de credenciales es un archivo .yaml, [en el tutorial de adwords](https://developers.google.com/adwords/api/docs/guides/start) se puede leer un poco más sobre este archivo.
   - report_definition: La definición del reporte a descargar. Se pasa tal como está
@@ -439,7 +441,7 @@ Ejemplo de un resultado File:
 `type: email`. Enviar el resultado del reporte como archivo adjunto por email.
 Las configuraciones son:
 
-  - connection: Nombre de una conección de tipo *email*.
+  - connection: Nombre de una conexión de tipo *email*.
   - profile: El perfil con credenciales a utilizar. Las credenciales tienen que tener el usuario y la contraseña del servicio smtp a utilizar (campos `username` y `password`).
   - filename: El nombre del archivo a adjuntar.
   - recipients: El o los receptores del email. Puede ser string con un receptor
@@ -469,7 +471,7 @@ Las configuraciones son:
 
   - profile: El perfil con credenciales a utilizar. Las credenciales tienen que tener el usuario y la contraseña del servicio ftp a utilizar (campos
   `username` y `password`).
-  - connection: Una conección de tipo ftp.
+  - connection: Una conexión de tipo ftp.
   - filename: Nombre con el que el archivo se va a subir.
 
 Ejemplo de un resultado ftp:
@@ -483,7 +485,7 @@ Ejemplo de un resultado ftp:
 }
 ```
 
-#### Drive
+#### Google Drive
 
 `type: drive`. Guarda el resultado del reporte en Google Drive. Estas son las configuraciones:
 
@@ -584,9 +586,9 @@ Ejemplo de definición de un resultado module:
 
 ### Configuración global
 
-Además de reportes, conecciones y perfiles se permiten configurar algunos datos estáticos:
+Además de reportes, conexiones y perfiles se permiten configurar algunos datos estáticos:
 
-  - timezone: la string del timezone a usar. Por defecto todas las fechas se generan en utc. Esta configuración puede ser reescrita para cada reporte
+  - timezone: la string del timezone a usar. Por defecto todas las fechas se generan en UTC. Esta configuración puede ser reescrita para cada reporte
   particular.
 
   - pwd: el directorio por defecto desde el cual laika va a leer los archivos de querys y guardar los resultados (en el caso de que se especifiquen con ruta relativa).

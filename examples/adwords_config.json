@@ -34,7 +34,7 @@
       "results": [
         {
           "type": "file",
-          "filename": "shopping_performace_report_{y}_{m}.csv"
+          "filename": "shopping_performance_report_{y}_{m}.csv"
         }
       ]
     }
