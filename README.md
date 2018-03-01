@@ -35,7 +35,7 @@ Another parameter you can use is `--pwd` which server for specifying working dir
 
 You can check all the predefined `laika.py` arguments with `--help`.
 
-Undefined arguments will be added to report's definition overwriting default values. Thus, if for example the configuration for `my_report` defines field `my_field` with value `foo`, if you call it like this:
+Undefined arguments will be added to report's definition overwriting default values. Thus, if for example the configuration for `my_report` defines field `my_field` with value `foo`, if you execute it like this:
 
 ```bash
 $ laika.py my_report --my_field bar
@@ -136,9 +136,9 @@ Example of a ftp connection:
 
 ### Reports
 
-Reports are json objects that must define these fields:
+Reports are defined as json objects that must define these fields:
 
- - name: this name will be used to call the report through cli.
+ - name: this name will be used to execute the report through cli.
  - type: report's type. Supported report types are defined below.
  - results: list of results configuration that define how to save the reports ([Results documentation](#Results)).
  - Set of required or optional fields that are detailed below.
