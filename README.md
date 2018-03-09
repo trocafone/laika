@@ -29,7 +29,7 @@ $ export LAIKA_CONFIG_FILE_PATH='/home/me/my_config.json'
 $ laika.py my_report
 ```
 
-Another parameter you can use is `--pwd` which server for specifying working directory. It can also be specified in configuration file or `LAIKA_PWD` environment variable.
+Another parameter you can use is `--pwd` which serves for specifying working directory. It can also be specified in configuration file or `LAIKA_PWD` environment variable.
 
 ### Arguments
 
@@ -46,7 +46,7 @@ $ laika.py my_report --my_field bar
 
 ## Configuration
 
-Laika will read reports definition from a json file. The file must have this structure:
+Laika reads reports definitions from a json file which must have this structure:
 
 ```json
 {
@@ -57,7 +57,7 @@ Laika will read reports definition from a json file. The file must have this str
 }
 ```
 
-The configuration can be separated in multiple files. You must have a base configuration file, which can have `"include"` field with a list of paths:
+The configuration can be separated in multiple files. In this case there must be a base configuration file that will have to include the other files via `"include"` field with a list of paths:
 
 ```json
 "include": [
@@ -66,7 +66,7 @@ The configuration can be separated in multiple files. You must have a base confi
 ]
 ```
 
-This files will be included in the configuration. The only constraint is they only can have `reports`, `connections` and `profiles` field defined.
+These files will be included in the configuration. The only constraint is they can only have `reports`, `connections` and `profiles` fields defined.
 
 You can check the [example configuration file](config.json) for more information.
 
@@ -81,7 +81,7 @@ Profiles are all kind of credentials used for accessing external APIs (like Goog
 }
 ```
 
-Credentials is always a json file, but it's format depends on each type of report or result. For example email credentials are defined like this:
+`credentials` is always a path to a json file, but it's format depends on each type of report or result. For example email credentials are defined like this:
 
 ```json
 {
