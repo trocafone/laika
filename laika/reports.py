@@ -1138,7 +1138,7 @@ class Config(dict):
 class Runner(object):
     """
     Runner is the responsible of running the reports and passing resulting to
-    the results, the way they are configured in the passed Config instance.
+    the results, the way they are configured in the given Config instance.
     """
 
     def __init__(self, conf, **kwargs):
