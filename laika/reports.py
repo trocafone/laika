@@ -60,8 +60,8 @@ class BasicReport(object):
 
     def process(self):
         """
-        Realizes the report process. The logic of the process must be defined
-        in subclasses. Should return the data to be used by the result class.
+        Executes the report process. The logic of the process must be defined
+        in subclasses. Must return the data to be used by the result class.
         """
         pass
 
@@ -201,7 +201,7 @@ class FilenameFormatter(ReportFormatter):
     """
     Acts like ReportFormatter, but the output date format depends on formatted
     key. For example, if the key is {y}, the date is formatted as '%Y', instead
-    if the isoformat.
+    of the isoformat.
     """
 
     def _to_format(self, value, fname=None):
@@ -263,8 +263,8 @@ class FileReport(FormattedReport):
 
 class QueryReport(FormattedReport):
     """
-    Makes a query to a given connection. The query is supposed to be a sql,
-    can
+    Makes a query to a given sqlalchemy connection.
+    The query is supposed to be a sql that the connection understands.
     """
 
     def __init__(self, *args, **kwargs):
@@ -631,7 +631,7 @@ class FileResult(Result):
 
     def write_data(self, path_or_buf):
         """
-        Writes data to a file on passed path or to passed buffer. Excel
+        Writes data to a file on given path or to passed buffer. Excel
         formats are written as excel files, tsv as tab separated values and the
         rest as csv.
         """
@@ -671,10 +671,10 @@ class FileResult(Result):
 
 
 class WriteToFile(FileResult):
-    """ Result that writes the data to a file on passed path. """
+    """ Result that writes the data to a file on given path. """
 
     def save(self):
-        """ Saves the file to the passed path. """
+        """ Saves the file to the given path. """
         filename = self.get_filename()
         logging.info('Writing result to %s', filename)
 

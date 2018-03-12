@@ -448,7 +448,7 @@ Example of ftp result:
 
  - profile: Name of the profile to use. Credentials of this profile must be ones of a service account with access to Google Drive API.
  - filename: Name for the resulting file.
- - folder: Directory, inside which the file will be stored. If not specified, the file is stored in the root of given drive. If there are more than one directory with the same name, the file will be stored in the first this result find (depends on Drive API).
+ - folder: Directory in which the file will be stored. If not specified, the file is stored in the root of given drive. If there are more than one directory with the same name, the file will be stored in the first one this result finds (depends on Drive API).
  - folder_id: Id of the directory in which the result will be saved. If specified, *folder* configuration will be ignored. You can get this id from the url in Google Drive web interface.
  - grant: Email of user, in the name of whom the file will be uploaded. Must have access to specified folder.
 
@@ -468,8 +468,6 @@ Example of drive result:
 #### S3
 
 `type: s3`. Saves the result in Amazon S3. In order to use this result, you have to install [boto3](http://boto3.readthedocs.io/en/latest/guide/quickstart.html#installation).
-
-Configuration:
 
 Configuration:
 
@@ -591,17 +589,15 @@ For example:
 
 Results in:
 
-ta en:
-
 ```
 2016-02-12 18:19:09, 2016-02-11 18:19:09, 2017-02-12 18:19:09, 2016-02-13 09:19:09, 2015-11-12 00:00:00
 ```
 
-Another possibility is to specify a start of week with `{f}`. For example, `{d-1f}` will move the date to Monday of the current week, and `{d+2f}` will mode the date to Monday within two weeks.
+Another possibility is to specify a start of week with `{f}`. For example, `{d-1f}` will move the date to Monday of the current week, and `{d+2f}` will move the date to Monday within two weeks.
 
 ### Query templating
 
-If the report have a dictionary of variables specified they will be replaced in the specified query file. For example, if you define a query like this:
+If the report has a dictionary of variables specified they will be replaced in the specified query file. For example, if you define a query like this:
 
 ```sql
 select something from some_table where type = '{my_type}'
