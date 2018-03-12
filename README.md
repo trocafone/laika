@@ -448,7 +448,7 @@ Example of ftp result:
 
  - profile: Name of the profile to use. Credentials of this profile must be ones of a service account with access to Google Drive API.
  - filename: Name for the resulting file.
- - folder: Directory in which the file will be stored. If not specified, the file is stored in the root of given drive. If there are more than one directory with the same name, the file will be stored in the first one this result finds (depends on Drive API).
+ - folder: Directory in which the file will be stored. If not specified, the file is stored in the root of given drive. If there is more than one directory with the same name, the file will be stored in the first one this result finds (depends on Drive API).
  - folder_id: Id of the directory in which the result will be saved. If specified, *folder* configuration will be ignored. You can get this id from the url in Google Drive web interface.
  - grant: Email of user, in the name of whom the file will be uploaded. Must have access to specified folder.
 
