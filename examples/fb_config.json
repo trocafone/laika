@@ -1,0 +1,22 @@
+{
+  "reports": [
+    {
+      "name": "some_facebook_query",
+      "type": "facebook",
+      "query_file": "query.sql",
+      "profile": "custom_facebook",
+      "params": {
+        "level": "ad",
+        "fields": "['account_id', 'account_name', 'campaign_id', 'campaign_name', 'adset_id', 'adset_name', 'ad_id', 'ad_name', 'frequency', 'reach', 'website_clicks', 'impressions', 'relevance_score', 'spend', 'actions']",
+        "filtering": ""
+      },
+      "object_id": "some object id like act_1234567890123456",
+      "results": [
+        {
+          "type": "file",
+          "filename": "some_facebook_insights_{y}_{m}_{d}.csv"
+        }
+      ]
+    }
+  ]
+}

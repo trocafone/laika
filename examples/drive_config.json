@@ -1,0 +1,17 @@
+{
+  "reports": [
+    {
+      "name": "query_to_drive",
+      "type": "query",
+      "connection": "local",
+      "query_file": "query.sql",
+      "result": {
+        "type": "drive",
+        "filename": "report_{Y}-{m}-{d}_{H}-{M}.tsv",
+        "profile": "custom_drive",
+        "folder": "TestReport",
+        "grant": "some_grant@mail.com"
+      }
+    }
+  ]
+}

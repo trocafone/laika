@@ -1,0 +1,42 @@
+{
+  "reports": [
+    {
+      "name": "example_adwords_report",
+      "type": "adwords",
+      "client_customer_id": "some customer id like 123-456-7890",
+      "report_definition": {
+        "reportName": "Shopping Performance Last Month",
+        "dateRangeType": "THIS_MONTH",
+        "reportType": "SHOPPING_PERFORMANCE_REPORT",
+        "downloadFormat": "CSV",
+        "selector": {
+            "fields": [
+                "AccountDescriptiveName",
+                "CampaignId",
+                "CampaignName",
+                "AdGroupName",
+                "AdGroupId",
+                "Clicks",
+                "Impressions",
+                "AverageCpc",
+                "Cost",
+                "ConvertedClicks",
+                "CrossDeviceConversions",
+                "SearchImpressionShare",
+                "SearchClickShare",
+                "CustomAttribute1",
+                "CustomAttribute2",
+                "Brand"
+            ]
+        }
+      },
+      "profile": "custom_googleads",
+      "results": [
+        {
+          "type": "file",
+          "filename": "shopping_performance_report_{y}_{m}.csv"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+wheel==0.26.0
+XlsxWriter==0.8.4
+wsgiref==0.1.2
+click==6.2
+pandas==0.19.2
+parse==1.6.6
+requests==2.9.1

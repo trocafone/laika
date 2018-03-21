@@ -1,0 +1,108 @@
+{
+  "timezone": "America/Sao_Paulo",
+  "include": [
+    "examples/drive_config.json",
+    "examples/email_config.json",
+    "examples/module_config.json",
+    "examples/adwords_config.json",
+    "examples/aws_config.json"
+  ],
+  "profiles": [
+    {
+      "name": "my_drive",
+      "credentials": "secret.json"
+    },
+    {
+      "name": "my_gmail",
+      "credentials": "gmail_credentials.json"
+    },
+    {
+      "name": "some_ftp",
+      "credentials": "ftp_credentials.json"
+    },
+    {
+      "name": "custom_googleads",
+      "credentials": "custom_googleads.yaml"
+    },
+    {
+      "name": "custom_facebook",
+      "credentials": "custom_facebook.json"
+    },
+    {
+      "name": "custom_aws",
+      "credentials": "aws_credentials.json"
+    }
+  ],
+  "connections": [
+    {
+      "name": "local",
+      "type": "postgre",
+      "constring": "postgresql://user:pass@database.host.local:5432/some_db"
+    },
+    {
+      "name": "gmail_smtp",
+      "type": "email",
+      "host": "smtp.gmail.com",
+      "port": 587
+    },
+    {
+      "name": "some_ftp",
+      "type": "ftp",
+      "host": "ftp.production.com"
+    }
+  ],
+  "reports": [
+    {
+      "name": "some_query",
+      "type": "query",
+      "query_file": "query.sql",
+      "connection": "local",
+      "results": [{
+          "type": "file",
+          "filename": "report_{Y}-{m}-{d-1d}_{H}-{M}.tsv"
+        }, {
+          "type": "file",
+          "filename": "report_{Y}-{m}-{d}_{H}-{M}.tsv"
+        }
+      ]
+    },
+    {
+      "name": "some_ftp_query",
+      "type": "query",
+      "query_file": "query.sql",
+      "connection": "local",
+      "results": [{
+          "type": "ftp",
+          "filename": "some_ftp_file.csv",
+          "connection": "some_ftp",
+          "profile": "some_ftp"
+        }
+      ]
+    }, {
+      "name": "bash_query",
+      "type": "bash",
+      "script": "python my_report.py",
+      "result_type": "raw",
+      "connection": "local",
+      "results": [
+        {
+          "type": "file",
+          "filename": "my_report.xlsx",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "some_redash_query",
+      "type": "redash",
+      "api_key": "17ee4a10dc1036e9a3f4af47db070a9f0b913e72",
+      "redash_url": "https://demo.redash.io",
+      "query_id": "538",
+      "results": [{
+          "type": "file",
+          "filename": "report_{Y}-{m}.tsv"
+        }
+      ]
+    }
+  ]
+}
