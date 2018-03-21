@@ -19,7 +19,7 @@ setup(
     author='Seva Gavrilov',
     author_email='gavrilovseva@gmail.com',
     version=version,
-    url='https://github.com/trocafone/reports',
+    url='https://github.com/trocafone/laika',
     packages=find_packages(),
     description='A simple business reporting system',
     install_requires=requirements,
