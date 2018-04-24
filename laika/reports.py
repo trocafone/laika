@@ -68,13 +68,21 @@ class BasicReport(object):
 
 class ModuleReport(BasicReport):
     """
-    TODO: document
+    Allows to execute custom Report classes.
+
+    This report loads a python file from result_file parameter, instantiates a
+    class, defined in result_class parameter, executes process method and
+    returns it's result value.
+    Instantiated class must be a BasicReport at least.
     """
+
     def __init__(self, conf, **kwargs):
         self.kwargs = kwargs
         super(ModuleReport, self).__init__(conf, **kwargs)
 
     def process(self):
+        # TODO: rename the parameters from result_.. to report_.. or something
+        # alike (or maybe refactor both ModuleResult and ModuleReport)
         module_name = os.path.basename(self.result_file).split('.')[0]
         module = imp.load_source(module_name, self.result_file)
         klass = module.__dict__[self.result_class]
@@ -212,7 +220,7 @@ class FilenameFormatter(ReportFormatter):
 
 
 class FormattedReport(BasicReport):
-    """ Report that holds a formatter instance """
+    """ Report that holds a ReportFormatter instance """
 
     def __init__(self, conf, *args, **kwargs):
         self.variables = None
@@ -221,7 +229,12 @@ class FormattedReport(BasicReport):
 
 
 class FileReport(FormattedReport):
-    """ Report that reads from file and provides methods for file parsing """
+    """
+    Report that reads from file on path defined by filename parameter.
+    Based on extension of given filename, file is parsed as pandas.DataFrame.
+    If raw parameter is True, reads the file into a buffer without parsing.
+    """
+
     filename = None
     raw = False
     encoding = 'utf-8'
@@ -311,9 +324,12 @@ class RedashReport(FormattedReport):
 
 class BashReport(BasicReport):
     """
-    Retrieves data from a Bash script. It execute it and returns what's
-    printed.
-    Needs script_file configuration in order to work.
+    Executes a Bash script and returns it's stdout.
+    Script can be defined as inline command via script parameter, or path to
+    bash file via script_file parameter.
+    If result_type is "json" (default) or "csv" then the output is parsed as
+    pandas.DataFrame. If result_type is "raw" then the ouput is returned as
+    buffer.
     """
     encoding = 'utf-8'
     result_type = 'json'
@@ -344,7 +360,7 @@ class BashReport(BasicReport):
 
 class TrackeameReport(BashReport):
     """
-    Runs a bash script that runs a .jar to get data from despegar.
+    Runs a bash script that runs a .jar to get data from Trackeame/ClickLAB.
 
     Requires report_id and report_filename to be defined.
     """
@@ -391,10 +407,20 @@ class TrackeameReport(BashReport):
 
 class AdwordsReport(BasicReport):
     """
-    TODO: document
+    Downloads reports from Google Adwords, using googleads library.
+
+    report_definition parameter is passed directly to ReportDownloader's
+    DownloadReport method, so you may want to check google's documentation for
+    report definition. As report definitions may be extensive, you can use
+    report definition from another adwords report, specifiyng reportName
+    parameter.
+
+    A report is downloaded for some customer defined via client_customer_id
+    parameter. If this parameter is a list of customer ids, then results are
+    appendend in one report.
+
+    Resulting report is always returned as buffer.
     """
-    encoding = 'utf-8'
-    result_type = 'json'
     dateRangeType = None
 
     adwords_service_version = 'v201710'
@@ -442,16 +468,21 @@ class AdwordsReport(BasicReport):
 
 class FacebookInsightsReport(BasicReport):
     """
-    Retrieves the data from the facebook graph API. Only tested to work
-    with the insights endpoint. It needs the object_id, and the set of params
-    to add to the request.By default, gets the impressions and the reach
-    on the ad level.
+    Retrieves the data from the insights endpoint of Facebook's graph API.
+    More info on Facebook's insights API: https://developers.facebook.com/docs/marketing-api/insights
+
+    Report requieres an object_id, and a set of params to add to the request. Y
+    ou can override the defaults via "params" parameter.
+    By default, gets the impressions and the reach on the ad level.
+
+    The report is generated via Facebook's API async job, the result of which
+    is polled every few seconds, defined via sleep_per_tick parameter.
     """
 
     defaults = {
         'level': 'ad',
         'limit': 10000000,
-        'filtering': json.dumps([{'field':'ad.effective_status','operator':'NOT_IN','value':['DELETED']}]),
+        'filtering': '[{"operator": "NOT_IN", "field": "ad.effective_status", "value": ["DELETED"]}]',
         'fields': 'impressions,reach',
         'action_attribution_windows': '28d_click',
         'date_preset': 'last_30d'
@@ -479,6 +510,9 @@ class FacebookInsightsReport(BasicReport):
     def wait_for_job_completion(self, job_id):
         tic = 0
         while True:
+            # TODO: this loop keeps running forever sometimes. We need to
+            # investigate a bit more about this job status response.
+
             r = requests.get(self.base_url.format(job_id),
                              params={'access_token': self.access_token})
             res = r.json()
@@ -552,6 +586,13 @@ class FacebookInsightsReport(BasicReport):
 
 
 class DownloadFromS3(FileReport):
+    """
+    Downloads an object from Amazon S3. Object's location is defined by bucket
+    and filename parameters (filename is the key of the object in S3).
+
+    The resulting object is processed as with FileReport's logic (i.e. parsed
+    as pandas.DataFrame if filename's extension is csv-like).
+    """
 
     def __init__(self, *args, **kwargs):
         super(DownloadFromS3, self).__init__(*args, **kwargs)
@@ -590,8 +631,13 @@ class Result(object):
 
 class ModuleResult(Result):
     """
-    TODO: document
+    Allows to execute custom Result classes.
+
+    This result loads a python file from result_file parameter, instantiates a
+    class, defined in result_class parameter, and executes save method.
+    Instantiated class must be a Result at least.
     """
+
     def __init__(self, conf, data, **kwargs):
         self.kwargs = kwargs
         super(ModuleResult, self).__init__(conf, data, **kwargs)
@@ -606,7 +652,7 @@ class ModuleResult(Result):
 
 class FileResult(Result):
     """
-    Abstract result that writes output to a file. Also, decides how to write
+    Abstract result class for working with files or buffers. Decides how to write
     the file based on it's extension and formats the output filename.
     """
 
@@ -644,16 +690,13 @@ class FileResult(Result):
         else:
             self.data.to_csv(path_or_buf, **args)
 
-    def data_is_buffer(self):
-        return is_buffer(self.data)
-
     def get_buffer(self):
         """
         Returns a buffer with file data. Useful for attaching buffer to
         requests, emails, etc. instead of writing to disk.
         """
 
-        if self.data_is_buffer():
+        if is_buffer(self.data):
             self.data.seek(0)
             return self.data
 
@@ -671,16 +714,18 @@ class FileResult(Result):
 
 
 class WriteToFile(FileResult):
-    """ Result that writes the data to a file on given path. """
+    """
+    Result that writes the data to a file on given path defined via filenmae
+    parameter.
+    """
 
     def save(self):
-        """ Saves the file to the given path. """
         filename = self.get_filename()
         logging.info('Writing result to %s', filename)
 
         if self.raw:
             with open(filename, 'w+') as f:
-                if self.data_is_buffer():
+                if is_buffer(self.data):
                     self.data.seek(0)
                     copyfileobj(self.data, f)
                 else:
@@ -700,7 +745,12 @@ class SendEmail(FileResult):
     Other parameters are filename, user, subject and body. Body can be
     formatted the same way filename does, so you can include dates to body
     template.
+
+    You can add append extra messages via as list via extra_text parameters,
+    and add some image attachments as buffers. Report result is attached by
+    default, you can disable it setting attach_data parameter to False.
     """
+
     body = 'Report generated {Y}-{m}-{d} {H}:{M}'
     recipients = []
     attachments = []
@@ -777,6 +827,8 @@ class SendEmail(FileResult):
 class UploadToFtp(FileResult):
     """
     Uploads the result as binary to a ftp server.
+
+    The file is first uploaded as "buffer.txt", and then renamed into filename.
     """
 
     def __init__(self, *args, **kwargs):
@@ -808,7 +860,11 @@ class UploadToFtp(FileResult):
 
 
 class UploadToSftp(FileResult):
-    """ Uploads the result as binary to a SFTP server. """
+    """
+    Uploads the result to an SFTP server. Requires credentials to appoint to
+    some file with the private key.
+    """
+
     def __init__(self, *args, **kwargs):
         self.private_key = None
         self.username = ''
@@ -864,8 +920,16 @@ def create_drive(profile, grant):
 
 class DownloadFromGoogleDrive(FileReport):
     """
-    Downloads one file from Google Drive as a dataframe or as
-    buffer.
+    Downloads a file from Google Drive.
+
+    File is specified via file_id or searched by filename. If filename is used,
+    it can be combined with folder_id (to search for file in that exact folder),
+    folder name (to search first for folder, and then for filename inside), or
+    with folder and subfoler (to search for folder/subfolder/filename
+    structure).
+
+    The resulting file is converted to pandas.DataFrame or to buffer using
+    logic from FileReport.
 
     Needs a google drive service account credentials in order to download the
     file headlessly.
@@ -885,10 +949,10 @@ class DownloadFromGoogleDrive(FileReport):
     def process(self):
         """
         Saves the data from google drive as a dataframe or a file.
-        If file id is specified it will download it, else it needs a folder and
-        a filename.
-        If the file doesn't exists or the folder is empty it raises an error.
-        mimetype needs to be specified if we want a certain type of file.
+
+        File is retrieved by id or searched by filename.
+        If file doesn't exists or the folder is empty it raises an error.
+        Mimetype needs to be specified if we want a certain type of file.
         """
         # cleans the result for multiple runs
         self.result_file = None
@@ -952,8 +1016,8 @@ class UploadToGoogleDrive(FileResult):
     Needs a google drive service account credentials in order to upload the
     file headlessly. If folder is specified, result is placed inside it. If
     title already exists, it's content is updated.
-
     """
+
     folder = None
     folder_id = None
 
@@ -1012,7 +1076,10 @@ class UploadToGoogleDrive(FileResult):
 
 
 class RedashResult(WriteToFile):
-    """ Saves result as json file that can be served to redash via API """
+    """
+    Saves result as json file that can be served to redash via API.
+    """
+
     fillna = ''
     encoding = 'latin-1'
 
@@ -1034,6 +1101,15 @@ class RedashResult(WriteToFile):
 
 
 class UploadToS3(FileResult):
+    """
+    Uploads the result to Amazon S3.
+
+    File's destination is defined by bucket and filename parameters (filename
+    will be the key of the object in S3).
+
+    The resulting object is processed as with FileReport's logic (i.e.
+    converted to excel if extension is xlsx).
+    """
 
     def __init__(self, *args, **kwargs):
         super(UploadToS3, self).__init__(*args, **kwargs)
