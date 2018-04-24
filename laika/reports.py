@@ -715,7 +715,7 @@ class FileResult(Result):
 
 class WriteToFile(FileResult):
     """
-    Result that writes the data to a file on given path defined via filenmae
+    Result that writes the data to a file on given path defined via filename
     parameter.
     """
 
