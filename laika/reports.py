@@ -471,8 +471,8 @@ class FacebookInsightsReport(BasicReport):
     Retrieves the data from the insights endpoint of Facebook's graph API.
     More info on Facebook's insights API: https://developers.facebook.com/docs/marketing-api/insights
 
-    Report requieres an object_id, and a set of params to add to the request. Y
-    ou can override the defaults via "params" parameter.
+    Report requieres an object_id, and a set of params to add to the request.
+    You can override the defaults via "params" parameter.
     By default, gets the impressions and the reach on the ad level.
 
     The report is generated via Facebook's API async job, the result of which
@@ -746,9 +746,9 @@ class SendEmail(FileResult):
     formatted the same way filename does, so you can include dates to body
     template.
 
-    You can add append extra messages via as list via extra_text parameters,
-    and add some image attachments as buffers. Report result is attached by
-    default, you can disable it setting attach_data parameter to False.
+    You can add a list of extra messages via extra_text parameter, and add some
+    image attachments as buffers. Report result is attached by default, you
+    can disable it setting attach_data parameter to False.
     """
 
     body = 'Report generated {Y}-{m}-{d} {H}:{M}'
