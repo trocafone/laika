@@ -487,7 +487,8 @@ class FacebookInsightsReport(BasicReport):
         'action_attribution_windows': '28d_click',
         'date_preset': 'last_30d'
     }
-    base_url = 'https://graph.facebook.com/v2.10/{}'
+    api_version = 'v3.0'
+    base_url = 'https://graph.facebook.com/{}/{}'
     endpoint = '/insights'
     job_results_limit = 500
     sleep_per_tick = 60
@@ -513,7 +514,7 @@ class FacebookInsightsReport(BasicReport):
             # TODO: this loop keeps running forever sometimes. We need to
             # investigate a bit more about this job status response.
 
-            r = requests.get(self.base_url.format(job_id),
+            r = requests.get(self.base_url.format(self.api_version, job_id),
                              params={'access_token': self.access_token})
             res = r.json()
 
@@ -560,7 +561,8 @@ class FacebookInsightsReport(BasicReport):
 
     def process(self):
         logging.info('Programming report job')
-        r = requests.post(self.url.format(self.object_id), params=self.params)
+        url = self.url.format(self.api_version, self.object_id)
+        r = requests.post(url, params=self.params)
 
         if 'report_run_id' not in r.json():
             raise ReportError('Could not retrieve the report: %s', r.text)
@@ -572,7 +574,8 @@ class FacebookInsightsReport(BasicReport):
 
         params = {'access_token': self.access_token, 'limit': self.job_results_limit,
                   'fields': self.params['fields']}
-        resp = requests.get(self.url.format(report_run_id), params=params)
+        url = self.url.format(self.api_version, report_run_id)
+        resp = requests.get(url, params=params)
         result = pd.DataFrame(self.results_from_response(resp))
 
         d = resp.json()
