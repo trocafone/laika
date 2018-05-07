@@ -14,6 +14,20 @@ with open('requirements.txt') as f:
     requirements = f.read().split('\n')
 
 
+excel = ['xlrd==1.1.0', 'XlsxWriter==0.8.4']
+query = ['SQLAlchemy==1.0.11']
+postgres = query + ['psycopg2==2.6.1']
+drive = ['PyDrive==1.3.1']
+adwords = ['googleads==10.1.0']
+s3 = ['boto3==1.4.3']
+sftp = ['paramiko==2.0.1']
+
+all_reports = excel + postgres + drive + adwords + s3 + sftp
+
+test = ['mock==1.3.0']
+docs = ['Sphinx>=1.7.1', 'sphinx-rtd-theme>=0.2.4']
+
+
 setup(
     name='laika',
     author='Seva Gavrilov',
@@ -28,13 +42,20 @@ setup(
         'Development Status :: 3 - Alpha',
         'Programming Language :: Python'
     ],
-    tests_require=['mock==1.3.0'],
+    tests_require=test,
     extras_require={
-        'drive': ['PyDrive==1.0.1'],
-        'test': ['mock==1.3.0'],
-        'query': ['SQLAlchemy==1.0.11'],
-        'postgres': ['psycopg2==2.6.1'],
-        'docs': ['Sphinx>=1.7.1', 'sphinx-rtd-theme>=0.2.4']
+        'excel': excel,
+        'query': query,
+        'postgres': postgres,
+        'drive': drive,
+        'adwords': adwords,
+        's3': s3,
+        'sftp': sftp,
+
+        'all_reports': all_reports,
+
+        'test': test,
+        'docs': docs
     },
     scripts=['laika.py']
 )
