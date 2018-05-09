@@ -32,7 +32,7 @@ docs = ['Sphinx>=1.7.1', 'sphinx-rtd-theme>=0.2.4']
 
 
 setup(
-    name='laika',
+    name='laika-lib',
     author='Seva Gavrilov',
     author_email='gavrilovseva@gmail.com',
     maintainer='Trocafone Data Science Team',
