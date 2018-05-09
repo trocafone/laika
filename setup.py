@@ -35,6 +35,8 @@ setup(
     name='laika',
     author='Seva Gavrilov',
     author_email='gavrilovseva@gmail.com',
+    maintainer='Trocafone Data Science Team',
+    maintainer_email='ds@trocafone.com',
     version=version,
     url='https://github.com/trocafone/laika',
     license='MIT',
