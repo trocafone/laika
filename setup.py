@@ -13,6 +13,9 @@ with open('laika/__init__.py', 'rb') as f:
 with open('requirements.txt') as f:
     requirements = f.read().split('\n')
 
+with open('README.md') as f:
+    readme_contents = f.read()
+
 
 excel = ['xlrd==1.1.0', 'XlsxWriter==0.8.4']
 query = ['SQLAlchemy==1.0.11']
@@ -29,18 +32,25 @@ docs = ['Sphinx>=1.7.1', 'sphinx-rtd-theme>=0.2.4']
 
 
 setup(
-    name='laika',
+    name='laika-lib',
     author='Seva Gavrilov',
     author_email='gavrilovseva@gmail.com',
+    maintainer='Trocafone Data Science Team',
+    maintainer_email='ds@trocafone.com',
     version=version,
     url='https://github.com/trocafone/laika',
+    license='MIT',
     packages=find_packages(),
-    description='A simple business reporting system',
+    description='A simple business reporting library',
+    long_description=readme_contents,
+    long_description_content_type='text/markdown',
+    keywords='report reporting etl sql s3 drive ftp adwords',
     install_requires=requirements,
     include_package_data=True,
     classifiers=[
         'Development Status :: 3 - Alpha',
-        'Programming Language :: Python'
+        'Programming Language :: Python',
+        'License :: OSI Approved :: MIT License'
     ],
     tests_require=test,
     extras_require={
