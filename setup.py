@@ -13,6 +13,9 @@ with open('laika/__init__.py', 'rb') as f:
 with open('requirements.txt') as f:
     requirements = f.read().split('\n')
 
+with open('README.md') as f:
+    readme_contents = f.read()
+
 
 excel = ['xlrd==1.1.0', 'XlsxWriter==0.8.4']
 query = ['SQLAlchemy==1.0.11']
@@ -37,6 +40,9 @@ setup(
     license='MIT',
     packages=find_packages(),
     description='A simple business reporting library',
+    long_description=readme_contents,
+    long_description_content_type='text/markdown',
+    keywords='report reporting etl sql s3 drive ftp adwords',
     install_requires=requirements,
     include_package_data=True,
     classifiers=[
