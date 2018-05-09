@@ -34,13 +34,15 @@ setup(
     author_email='gavrilovseva@gmail.com',
     version=version,
     url='https://github.com/trocafone/laika',
+    license='MIT',
     packages=find_packages(),
-    description='A simple business reporting system',
+    description='A simple business reporting library',
     install_requires=requirements,
     include_package_data=True,
     classifiers=[
         'Development Status :: 3 - Alpha',
-        'Programming Language :: Python'
+        'Programming Language :: Python',
+        'License :: OSI Approved :: MIT License'
     ],
     tests_require=test,
     extras_require={
