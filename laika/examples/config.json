@@ -1,11 +1,11 @@
 {
   "timezone": "America/Sao_Paulo",
   "include": [
-    "examples/drive_config.json",
-    "examples/email_config.json",
-    "examples/module_config.json",
-    "examples/adwords_config.json",
-    "examples/aws_config.json"
+    "drive_config.json",
+    "email_config.json",
+    "module_config.json",
+    "adwords_config.json",
+    "aws_config.json"
   ],
   "profiles": [
     {
