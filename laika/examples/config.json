@@ -5,7 +5,8 @@
     "email_config.json",
     "module_config.json",
     "adwords_config.json",
-    "aws_config.json"
+    "aws_config.json",
+    "fb_config.json"
   ],
   "profiles": [
     {
