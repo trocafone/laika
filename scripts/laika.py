@@ -6,7 +6,11 @@ import logging
 import os
 import sys
 
-from laika.reports import Config, Runner
+# Temporary fix to use script having same name as the module
+if os.path.dirname(os.path.realpath(__file__)) == sys.path[0]:
+    sys.path.pop(0)
+
+import laika
 
 
 ENV_LAIKA_CONFIG = 'LAIKA_CONFIG_FILE_PATH'
@@ -32,20 +36,26 @@ def run(ctx, report, run_all, config, show_list, loglevel, pwd):
     you can specify another file with --config option.
     """
 
-    current_path = os.path.dirname(os.path.realpath(__file__))
-    config = config or os.environ.get(ENV_LAIKA_CONFIG) or current_path + '/config.json'
+    pwd = pwd or os.environ.get(ENV_LAIKA_PWD)
+    config = config or os.environ.get(ENV_LAIKA_CONFIG)
+
+    if not config and not pwd:
+        import pkg_resources
+        pwd = pkg_resources.resource_filename('laika', 'examples/')
+        config = os.path.join(pwd, 'config.json')
+        click.secho('Config file not specified, running with example configuration!', fg='yellow')
+
     logging.basicConfig(format='[%(asctime)s] %(name)s:%(levelname)s - %(message)s',
                         stream=sys.stdout, level=getattr(logging, loglevel), datefmt='%Y-%m-%d %H:%M:%S')
 
-    pwd = pwd or os.environ.get(ENV_LAIKA_PWD) or current_path
-    conf = Config(config, pwd)
+    conf = laika.Config(config, pwd)
 
     if show_list:
         click.echo(('Reports available: \n\n\t- ' +
                     '\n\t- '.join(sorted(conf.get_available_reports()))) + '\n')
 
     extra_args = dict(zip(*2 * [iter(a.replace('--', '') for a in ctx.args)]))
-    runner = Runner(conf, **extra_args)
+    runner = laika.Runner(conf, **extra_args)
     if report:
         runner.run_report(report)
     elif run_all:

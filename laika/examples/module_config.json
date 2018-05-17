@@ -4,12 +4,12 @@
       "name": "module_report",
       "type": "module",
       "result_class": "BarReport",
-      "result_file": "examples/custom_module.py",
+      "result_file": "custom_module.py",
       "results": [
         {
           "type": "module",
           "result_class": "FooResult",
-          "result_file": "examples/custom_module.py"
+          "result_file": "custom_module.py"
         }
       ]
     }

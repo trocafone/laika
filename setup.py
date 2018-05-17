@@ -67,5 +67,5 @@ setup(
         'test': test,
         'docs': docs
     },
-    scripts=['laika.py']
+    scripts=['scripts/laika.py']
 )
