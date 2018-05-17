@@ -2,11 +2,21 @@
 
 *laika* is a business reporting library that allows you to request data from different sources and send it to someone as or save it at some destination. For example: you can query your database, send the result as an excel attachment via email and save it on Google Drive or Amazon S3.
 
-TODO: document what it is and what it is not
+<!-- TODO: document what it is and what it is not -->
 
 ## Installation
 
-TODO: document this
+You can install it directly using `pip`:
+
+```bash
+$ pip install laika-lib
+```
+
+You can specify extra dependencies. To find out what dependencies you need to install, check out reports and results documentation. For example, to install libraries to use Google Drive and Amazon S3 in your reports you must run:
+
+```bash
+$ pip install laika-lib[drive, s3]
+```
 
 ## Usage
 
@@ -48,7 +58,9 @@ $ laika.py my_report --my_field bar
 
 To run test, you must install test dependencies:
 
-TODO: document
+```bash
+$ pip install laika-lib[test]
+```
 
 Then, run test from laika directory:
 
