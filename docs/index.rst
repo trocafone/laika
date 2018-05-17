@@ -12,12 +12,24 @@ destination. For example: you can query your database, send the result
 as an excel attachment via email and save it on Google Drive or Amazon
 S3.
 
-TODO: document what it is and what it is not
+.. TODO: document what it is and what it is not
 
 Installation
 ------------
 
-TODO: document this
+You can install it directly using `pip`:
+
+
+.. code:: bash
+
+    $ pip install laika-lib
+
+You can specify extra dependencies. To find out what dependencies you need to install, check out configuration docs. For example, to install libraries to use Google Drive and Amazon S3 in your reports you must run:
+
+
+.. code:: bash
+
+    $ pip install laika-lib[drive, s3]
 
 Usage
 -----
@@ -72,7 +84,9 @@ Testing
 
 To run test, you must install test dependencies:
 
-TODO: document
+.. code:: bash
+
+    $ pip install laika-lib[test]
 
 Then, run test from laika directory:
 

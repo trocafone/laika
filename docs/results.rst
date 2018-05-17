@@ -84,6 +84,9 @@ Example of ftp result:
 Google Drive
 ^^^^^^^^^^^^
 
+.. note:: To use drive result you must install ``drive`` dependency:
+    ``pip install laika-lib[drive]``
+
 ``type: drive``. Saves report data in Google Drive. These are the
 configurations:
 
@@ -112,8 +115,11 @@ Example of drive result:
       "grant": "me@mail.com"
     }
 
-S3
-^^
+Amazon S3
+^^^^^^^^^
+
+.. note:: To use S3 result you must install ``drive`` dependency:
+    ``pip install laika-lib[drive]``
 
 ``type: s3``. Saves the result in Amazon S3. In order to use this
 result, you have to install
@@ -183,8 +189,8 @@ Configuration:
 This result will be executed as any other result - it will have
 available all the extra configuration you define.
 
-**Warning**: this will load and execute arbitrary code, which implies a
-series of security holes. Always check custom modules before using them.
+.. Warning:: this result will load and execute arbitrary code, which implies a
+   series of security holes. Always check custom modules before using them.
 
 Example of a module result definition:
 
