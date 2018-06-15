@@ -11,4 +11,4 @@ class BarReport(BasicReport):
 class FooResult(Result):
 
     def save(self):
-        print str(self.data)
+        print(str(self.data))
