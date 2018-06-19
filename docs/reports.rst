@@ -279,7 +279,7 @@ Example of adwords query:
     {
       "name": "some_adwords_report",
       "type": "adwords",
-      "client_customer_id": "123-456-7890",
+      "client_customer_ids": "123-456-7890",
       "report_definition": {
         "reportName": "Shopping Performance Last Month",
         "dateRangeType": "THIS_MONTH",

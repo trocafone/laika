@@ -419,7 +419,7 @@ class AdwordsReport(BasicReport):
     report definition from another adwords report, specifiyng reportName
     parameter.
 
-    A report is downloaded for some customer defined via client_customer_id
+    A report is downloaded for some customer defined via client_customer_ids
     parameter. If this parameter is a list of customer ids, then results are
     appendend in one report.
 
@@ -731,7 +731,8 @@ class WriteToFile(FileResult):
         logging.info('Writing result to %s', filename)
 
         if self.raw:
-            with open(filename, 'w+') as f:
+            mode = 'w+' + ('b' if isinstance(self.data, bytes) else '')
+            with open(filename, mode) as f:
                 if is_buffer(self.data):
                     self.data.seek(0)
                     copyfileobj(self.data, f)
