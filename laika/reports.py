@@ -16,7 +16,7 @@ import time
 
 try:
     from cStringIO import StringIO
-except ModuleNotFoundError:
+except ImportError:
     from io import StringIO
 
 from datetime import datetime
