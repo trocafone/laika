@@ -11,6 +11,7 @@ import logging
 import smtplib
 import requests
 import shlex
+import six
 import subprocess
 import time
 
@@ -256,7 +257,7 @@ class FileReport(FormattedReport):
         args.update(self.extra_args)
         if self.raw:
             if is_buffer(path_or_buf):
-                s = StringIO()
+                s = six.BytesIO()
                 s.write(path_or_buf.read())
                 return s
             else:
@@ -692,10 +693,15 @@ class FileResult(Result):
                     float_format=self.float_format, header=self.header)
         if self.extension in {'xls', 'xlsx', 'xlsm'}:
             self.data.to_excel(path_or_buf, engine='xlsxwriter', **args)
-        elif self.extension in {'tsv'}:
-            self.data.to_csv(path_or_buf, sep='\t', **args)
         else:
-            self.data.to_csv(path_or_buf, **args)
+            if self.extension in {'tsv'}:
+                args['sep'] = '\t'
+            if six.PY2 or isinstance(path_or_buf, six.string_types):
+                self.data.to_csv(path_or_buf, **args)
+            else:
+                # Workaround to pandas not knowing to write to BytesIO in Python 3
+                s = self.data.to_csv(**args)
+                path_or_buf.write(s.encode(self.encoding))
 
     def get_buffer(self):
         """
@@ -707,17 +713,17 @@ class FileResult(Result):
             self.data.seek(0)
             return self.data
 
-        string_io = StringIO()
+        io = six.BytesIO()
         if self.raw:
-            string_io.write(self.data)
+            io.write(self.data)
         elif self.extension in {'xls', 'xlsx', 'xlsm'}:
-            writer = pd.ExcelWriter(string_io, engine='xlsxwriter')
+            writer = pd.ExcelWriter(io, engine='xlsxwriter')
             self.write_data(writer)
             writer.save()
         else:
-            self.write_data(string_io)
-        string_io.seek(0)
-        return string_io
+            self.write_data(io)
+        io.seek(0)
+        return io
 
 
 class WriteToFile(FileResult):
@@ -795,7 +801,7 @@ class SendEmail(FileResult):
         message.attach(MIMEText(body, 'plain', 'utf-8'))
 
         for text in self.extra_text:
-            if isinstance(text, str):
+            if isinstance(text, six.string_types):
                 text = MIMEText(text, 'plain', 'utf-8')
             message.attach(text)
 
@@ -1103,7 +1109,7 @@ class RedashResult(WriteToFile):
             'rows': self.data.to_dict('records')
         }
 
-        self.data = StringIO()
+        self.data = six.BytesIO()
         json.dump(res, self.data, encoding=self.encoding, allow_nan=False)
         super(RedashResult, self).save()
 
@@ -1174,7 +1180,7 @@ class Config(dict):
     }
 
     def __init__(self, config, pwd=None):
-        if isinstance(config, str):
+        if isinstance(config, six.string_types):
             config = json.load(open(config))
 
         self._conf = config

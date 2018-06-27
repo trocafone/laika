@@ -1,5 +1,5 @@
 
-import sys
+import six
 import pandas as pd
 from unittest import TestCase
 
@@ -55,7 +55,7 @@ class LaikaTest(TestCase):
         query = 'select foo from bar;'
         res = pd.DataFrame([[1, 1], [2, 2]])
         self.pd_sql_query.return_value = res
-        open_s = '__builtin__' if sys.version_info[0] < 3 else 'builtins'
+        open_s = six.moves.builtins.__name__
         with patch(open_s + '.open', mock_open(read_data=query)):
             runner = Runner(config)
             runner.run()
