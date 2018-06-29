@@ -458,7 +458,7 @@ class AdwordsReport(BasicReport):
     def process(self):
         report_downloader = self.ads_client.GetReportDownloader(version=self.adwords_service_version)
         first_client_id_processed = False
-        result = StringIO()
+        result = six.BytesIO()
         for customer_id in self.client_customer_ids:
             report_downloader.DownloadReport(
                 self.report_definition, result,
