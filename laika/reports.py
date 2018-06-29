@@ -15,11 +15,6 @@ import six
 import subprocess
 import time
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
-
 from datetime import datetime
 from dateutil.relativedelta import relativedelta, MO
 from string import Formatter
