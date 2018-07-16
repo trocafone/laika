@@ -694,7 +694,7 @@ class FileResult(Result):
             if six.PY2 or isinstance(path_or_buf, six.string_types):
                 self.data.to_csv(path_or_buf, **args)
             else:
-                # Workaround to pandas not knowing to write to BytesIO in Python 3
+                # Workaround to pandas not being able to write to BytesIO in Python 3
                 s = self.data.to_csv(**args)
                 path_or_buf.write(s.encode(self.encoding))
 
