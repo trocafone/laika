@@ -7,6 +7,10 @@ Results are defined for each report in a list. Each result is an object,
 that must define *type* field. The rest of the fields depend on the type
 of result. Below are described all the supported results.
 
+.. note:: Results will be executed in the same order they are defined. If the
+    first one raise an exception, the execution will be suspended (the next
+    ones will not execute).
+
 File
 ^^^^
 
