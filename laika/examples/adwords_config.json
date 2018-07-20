@@ -3,7 +3,7 @@
     {
       "name": "example_adwords_report",
       "type": "adwords",
-      "client_customer_id": "some customer id like 123-456-7890",
+      "client_customer_ids": "some customer id like 123-456-7890",
       "report_definition": {
         "reportName": "Shopping Performance Last Month",
         "dateRangeType": "THIS_MONTH",

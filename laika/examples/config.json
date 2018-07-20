@@ -82,9 +82,8 @@
     }, {
       "name": "bash_query",
       "type": "bash",
-      "script": "python my_report.py",
+      "script": "ls -l",
       "result_type": "raw",
-      "connection": "local",
       "results": [
         {
           "type": "file",

@@ -2,7 +2,11 @@
 
 *laika* is a business reporting library that allows you to request data from different sources and send it to someone or save it at some destination. For example: you can query your database, send the result as an excel attachment via email and save it on Google Drive or Amazon S3.
 
+Check out the documentation at [readthedocs](http://laika.readthedocs.io/en/latest/index.html>).
+
 <!-- TODO: document what it is and what it is not -->
+
+Laika was tested on Python 2.7 and 3.5 or higher.
 
 ## Installation
 

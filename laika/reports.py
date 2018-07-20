@@ -11,10 +11,10 @@ import logging
 import smtplib
 import requests
 import shlex
+import six
 import subprocess
 import time
 
-from cStringIO import StringIO
 from datetime import datetime
 from dateutil.relativedelta import relativedelta, MO
 from string import Formatter
@@ -252,7 +252,7 @@ class FileReport(FormattedReport):
         args.update(self.extra_args)
         if self.raw:
             if is_buffer(path_or_buf):
-                s = StringIO()
+                s = six.BytesIO()
                 s.write(path_or_buf.read())
                 return s
             else:
@@ -415,7 +415,7 @@ class AdwordsReport(BasicReport):
     report definition from another adwords report, specifiyng reportName
     parameter.
 
-    A report is downloaded for some customer defined via client_customer_id
+    A report is downloaded for some customer defined via client_customer_ids
     parameter. If this parameter is a list of customer ids, then results are
     appendend in one report.
 
@@ -444,7 +444,7 @@ class AdwordsReport(BasicReport):
         self.ads_client = adwords.AdWordsClient.LoadFromStorage(creds_file)
 
     def load_report(self, name):
-        for key, report in self.conf['reports'].iteritems():
+        for key, report in self.conf['reports'].items():
             if report['type'] == 'adwords' and 'report_definition' in report:
                 definition = report['report_definition']
                 if definition['reportName'] == name:
@@ -453,7 +453,7 @@ class AdwordsReport(BasicReport):
     def process(self):
         report_downloader = self.ads_client.GetReportDownloader(version=self.adwords_service_version)
         first_client_id_processed = False
-        result = StringIO()
+        result = six.BytesIO()
         for customer_id in self.client_customer_ids:
             report_downloader.DownloadReport(
                 self.report_definition, result,
@@ -526,9 +526,9 @@ class FacebookInsightsReport(BasicReport):
 
             status = res['async_status']
 
-            if status == u'Job Completed' and res['async_percent_completion'] == 100:
+            if status == 'Job Completed' and res['async_percent_completion'] == 100:
                 break
-            elif status == u'Job Not Started' or res['is_running']:
+            elif status == 'Job Not Started' or res['is_running']:
                 if tic % 3 == 0:
                     logging.info('Job running, completion percentage: %d', res['async_percent_completion'])
                 time.sleep(self.sleep_per_tick)
@@ -624,7 +624,7 @@ class Result(object):
     def __init__(self, conf, data, **kwargs):
         self.conf = conf
         self.data = data
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             setattr(self, key, value)
 
     def save(self):
@@ -688,10 +688,15 @@ class FileResult(Result):
                     float_format=self.float_format, header=self.header)
         if self.extension in {'xls', 'xlsx', 'xlsm'}:
             self.data.to_excel(path_or_buf, engine='xlsxwriter', **args)
-        elif self.extension in {'tsv'}:
-            self.data.to_csv(path_or_buf, sep='\t', **args)
         else:
-            self.data.to_csv(path_or_buf, **args)
+            if self.extension in {'tsv'}:
+                args['sep'] = '\t'
+            if six.PY2 or isinstance(path_or_buf, six.string_types):
+                self.data.to_csv(path_or_buf, **args)
+            else:
+                # Workaround to pandas not being able to write to BytesIO in Python 3
+                s = self.data.to_csv(**args)
+                path_or_buf.write(s.encode(self.encoding))
 
     def get_buffer(self):
         """
@@ -703,17 +708,17 @@ class FileResult(Result):
             self.data.seek(0)
             return self.data
 
-        string_io = StringIO()
+        io = six.BytesIO()
         if self.raw:
-            string_io.write(self.data)
+            io.write(self.data)
         elif self.extension in {'xls', 'xlsx', 'xlsm'}:
-            writer = pd.ExcelWriter(string_io, engine='xlsxwriter')
+            writer = pd.ExcelWriter(io, engine='xlsxwriter')
             self.write_data(writer)
             writer.save()
         else:
-            self.write_data(string_io)
-        string_io.seek(0)
-        return string_io
+            self.write_data(io)
+        io.seek(0)
+        return io
 
 
 class WriteToFile(FileResult):
@@ -727,7 +732,8 @@ class WriteToFile(FileResult):
         logging.info('Writing result to %s', filename)
 
         if self.raw:
-            with open(filename, 'w+') as f:
+            mode = 'w+' + ('b' if isinstance(self.data, bytes) else '')
+            with open(filename, mode) as f:
                 if is_buffer(self.data):
                     self.data.seek(0)
                     copyfileobj(self.data, f)
@@ -790,7 +796,7 @@ class SendEmail(FileResult):
         message.attach(MIMEText(body, 'plain', 'utf-8'))
 
         for text in self.extra_text:
-            if isinstance(text, basestring):
+            if isinstance(text, six.string_types):
                 text = MIMEText(text, 'plain', 'utf-8')
             message.attach(text)
 
@@ -1098,7 +1104,7 @@ class RedashResult(WriteToFile):
             'rows': self.data.to_dict('records')
         }
 
-        self.data = StringIO()
+        self.data = six.BytesIO()
         json.dump(res, self.data, encoding=self.encoding, allow_nan=False)
         super(RedashResult, self).save()
 
@@ -1169,7 +1175,7 @@ class Config(dict):
     }
 
     def __init__(self, config, pwd=None):
-        if isinstance(config, basestring):
+        if isinstance(config, six.string_types):
             config = json.load(open(config))
 
         self._conf = config
