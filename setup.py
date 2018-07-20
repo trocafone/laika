@@ -21,7 +21,7 @@ excel = ['xlrd==1.1.0', 'XlsxWriter==0.8.4']
 query = ['SQLAlchemy==1.0.11']
 postgres = query + ['psycopg2==2.6.1']
 drive = ['PyDrive==1.3.1']
-adwords = ['googleads==11.0.1']
+adwords = ['googleads==12.2.0']
 s3 = ['boto3==1.4.3']
 sftp = ['paramiko==2.0.1']
 

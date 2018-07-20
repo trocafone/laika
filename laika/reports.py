@@ -423,7 +423,7 @@ class AdwordsReport(BasicReport):
     """
     dateRangeType = None
 
-    adwords_service_version = 'v201710'
+    adwords_service_version = 'v201806'
 
     def __init__(self, *args, **kwargs):
         self.report_definition = None
