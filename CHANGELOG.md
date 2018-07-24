@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [1.1.0] - 2018-06-20
+## [1.1.0] - 2018-06-24
 
  - Added Python 3 support (>= 3.5)
  - Updated adwords version to v201806
