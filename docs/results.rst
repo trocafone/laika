@@ -154,6 +154,32 @@ Example of s3 result:
       "filename": "reports/custom_report.csv"
     }
 
+SFTP
+^^^^
+
+``type: sftp``. Uploads the data to a SFTP server. Configurations for this
+result are:
+
+-  profile: Name of the profile to use. Credentials file must have
+   ``username`` and optionally ``password`` fields and/or ``private_key`` to
+   authenticate in the SFTP service. ``private_key`` should be a path to a file
+   with the private key.
+-  connection: Name of a connection of ftp type.
+-  folder: Folder in which the file will be saved. Can be a unix style path.
+-  filename: Name with which the file will be uploaded to ftp.
+
+Example of SFTP result:
+
+.. code:: json
+
+    {
+      "type": "sftp",
+      "profile": "my_sftp_profile",
+      "connection": "some_sftp",
+      "folder": "./some_folder/",
+      "filename": "my_report.csv"
+    }
+
 Redash
 ^^^^^^
 
