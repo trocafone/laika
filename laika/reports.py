@@ -877,20 +877,28 @@ class UploadToSftp(FileResult):
     def __init__(self, *args, **kwargs):
         self.private_key = None
         self.username = ''
+        self.password = None
         super(UploadToSftp, self).__init__(*args, **kwargs)
 
         self.credentials = get_json_credentials(self)
 
         self.username = self.username or self.credentials.get('username', '')
+        self.password = self.password or self.credentials.get('password')
 
         self.conn = self.conf['connections'][self.connection]
 
     def save(self):
         import paramiko
         logging.info('Connecting to SFTP server: %s', self.conn['host'])
-        rsa_key = paramiko.RSAKey.from_private_key_file(self.credentials['private_key'])
+
+        if 'private_key' in self.credentials:
+            pkey_file = self.credentials['private_key']
+            rsa_key = paramiko.RSAKey.from_private_key_file(pkey_file)
+        else:
+            rsa_key = None
+
         transport = paramiko.Transport((self.conn['host'], self.conn['port']))
-        transport.connect(username=self.username, pkey=rsa_key)
+        transport.connect(username=self.username, password=self.password, pkey=rsa_key)
         sftp = paramiko.SFTPClient.from_transport(transport)
         filename = self.get_filename()
         logging.info('Uploading %s', filename)
