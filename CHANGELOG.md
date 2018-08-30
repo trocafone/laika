@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+ - Added password parameter to SFTP result
+
 ## [1.1.0] - 2018-06-24
 
  - Added Python 3 support (>= 3.5)
