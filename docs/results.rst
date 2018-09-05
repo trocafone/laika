@@ -106,6 +106,8 @@ configurations:
    id from the url in Google Drive web interface.
 -  grant: Email of user, in the name of whom the file will be uploaded.
    Must have access to specified folder.
+-  mime_type: Media type of the file to be uploaded. If none is specified
+   it will take the type of the filename extension.
 
 Example of drive result:
 

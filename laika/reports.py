@@ -1028,7 +1028,7 @@ class DownloadFromGoogleDrive(FileReport):
 
 class UploadToGoogleDrive(FileResult):
     """
-    Uploads the result to Google Drive as a spreadsheet.
+    Uploads the result to Google Drive.
 
     Needs a google drive service account credentials in order to upload the
     file headlessly. If folder is specified, result is placed inside it. If
@@ -1037,6 +1037,7 @@ class UploadToGoogleDrive(FileResult):
 
     folder = None
     folder_id = None
+    mime_type = None
 
     def __init__(self, *args, **kwargs):
         super(UploadToGoogleDrive, self).__init__(*args, **kwargs)
@@ -1079,7 +1080,7 @@ class UploadToGoogleDrive(FileResult):
             # In order to place it in the specified parent folder, it's id is needed
             parents = [{'id': parent_file['id']}] if parent_file else []
             result_file = self.drive.CreateFile({'title': filename,
-               'parents': parents, 'mymeType': 'application/vnd.google-apps.spreadsheet'})
+               'parents': parents, 'mimeType': self.mime_type})
 
         # Generating an io object with the spreadsheet
         logging.info('Writing the file')
