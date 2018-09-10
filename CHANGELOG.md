@@ -2,7 +2,10 @@
 
 ## [Unreleased]
 
+## [1.1.1]
+
  - Added password parameter to SFTP result
+ - Fixed mime_type parameter for Google Drive result
 
 ## [1.1.0] - 2018-06-24
 
