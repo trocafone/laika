@@ -1,4 +1,7 @@
+
 # Laika
+
+![laika_stamp](http://3.bp.blogspot.com/_r7sReQYd6vU/R_eomB1FWfI/AAAAAAAAAVM/PBKP7ng7KVA/s400/Romania_Laika.jpg)
 
 *laika* is a business reporting library that allows you to request data from different sources and send it to someone or save it at some destination. For example: you can query your database, send the result as an excel attachment via email and save it on Google Drive or Amazon S3.
 
