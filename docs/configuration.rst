@@ -103,6 +103,7 @@ Example of a ftp connection:
       "host": "ftp.home.com"
     }
 
+.. _global-configuration:
 
 Global configuration
 ~~~~~~~~~~~~~~~~~~~~
@@ -110,9 +111,20 @@ Global configuration
 In addition to reports, connections and profiles you can define this
 configurations:
 
+-  now: string with a datetime to use as current datetime. Useful if your
+   reports or results make use of templating to depend on dates relative to
+   current date. Must match ``%Y-%m-%d %H:%M:%S`` format.
+
 -  timezone: string of timezone to use. By default all the dates will be
    generated in UTC. You can overwrite it for each particular report.
 
 -  pwd: directory, to which laika will change before executing reports.
    In this directory it will, for example, read query files, or save
    file results (if relative path is specified).
+
+
+These configurations can be overwritten via command line arguments:
+
+.. code:: bash
+
+    $ laika.py my_report --now "2018-11-12 00:00:00"

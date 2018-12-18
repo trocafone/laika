@@ -82,6 +82,8 @@ this:
 
 ``my_field`` configuration will contain ``bar`` as value.
 
+You can also overwrite :ref:`global-configuration` via command line arguments.
+
 
 Testing
 -------
