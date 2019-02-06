@@ -140,7 +140,8 @@ class ReportFormatter(object):
     def get_now(self):
         tz = getattr(self, 'timezone', None) or self.conf.timezone
         tz = pytz.timezone(tz) if tz else pytz.utc
-        return datetime.now(tz)
+        return tz.localize(datetime.strptime(self.conf.now, '%Y-%m-%d %H:%M:%S')
+                           if self.conf.now is not None else datetime.now())
 
     def format(self, report_string):
         """
@@ -1233,8 +1234,9 @@ class Config(dict):
             config = json.load(open(config))
 
         self._conf = config
-        for key in ['timezone', 'pwd']:
-            setattr(self, key, self._conf.get(key, None))
+
+        self._global_config_fields = ['timezone', 'pwd', 'now']
+        self.overwrite_attributes(self._conf)
 
         self.pwd = self.pwd or pwd
         if self.pwd:
@@ -1272,6 +1274,14 @@ class Config(dict):
 
     def get_available_reports(self):
         return self['reports'].keys()
+
+    def overwrite_attributes(self, new_attributes):
+        """
+        Overwrites global configurations with a passed dictionary.
+        Only overwrites predefined fields.
+        """
+        for key in self._global_config_fields:
+            setattr(self, key, new_attributes.get(key, None))
 
 
 class Runner(object):

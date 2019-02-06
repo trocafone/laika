@@ -1,11 +1,12 @@
 
-from laika.reports import Result, BasicReport
+from laika.reports import Result, FormattedReport
 
 
-class BarReport(BasicReport):
+class BarReport(FormattedReport):
 
     def process(self):
-        return 'Wow! Such data! Much custom!'
+        current_date = self.formatter.format('{t}')
+        return 'Wow! Such data! Much custom! Even with a date: ' + current_date
 
 
 class FooResult(Result):
