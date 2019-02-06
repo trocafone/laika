@@ -304,7 +304,14 @@ class RedashReport(FormattedReport):
     Retrieves data from re:dash API. Makes a GET request to the endpoint.
     Needs redash_url, query_id and api_key in order to work (api_key can be
     for query or for user).
+    If refresh set to True, makes a POST request to refresh the query and
+    waits for the response before moving forward. The api_key must be of the
+    user type for this to work.
     """
+    refresh = False
+    max_retries = 60
+    sleep_time = 1
+    parameters = {}
 
     def __init__(self, *args, **kwargs):
         self.api_key = None
@@ -315,12 +322,50 @@ class RedashReport(FormattedReport):
     def process(self):
         logging.info('Retrieving query %s from %s', self.query_id,
                      self.redash_url)
-        path = ('{}/api/queries/{}/results.json?api_key={}'.format(
-            self.redash_url, self.query_id, self.api_key))
+        requests_session = requests.Session()
+        requests_session.headers.update({'Authorization': 'Key {}'.format(self.api_key)})
+        result_id = ''
+        if self.refresh:
+            result_id = self.refresh_query(requests_session)
 
-        response = requests.get(path)
+        path = '{}/api/queries/{}/results{}.json'.format(self.redash_url,
+                                                         self.query_id,
+                                                         result_id)
+        response = requests_session.get(path, params=self.format_parameters())
+
         data = response.json()['query_result']['data']
         return pd.DataFrame(data['rows'])
+
+    def refresh_query(self, requests_session):
+        logging.info('Refreshing query')
+        path = '{}/api/queries/{}/refresh'.format(self.redash_url, self.query_id)
+        response = requests_session.post(path, params=self.format_parameters())
+
+        return self.poll_job(requests_session, response.json()['job'])
+
+    def poll_job(self, requests_session, job):
+        SUCCESS = 3
+        FAILURE = 4
+        retries = 0
+        while job['status'] not in (SUCCESS, FAILURE):
+            response = requests_session.get('{}/api/jobs/{}'.format(self.redash_url, job['id']))
+            job = response.json()['job']
+            time.sleep(self.sleep_time)
+            retries += 1
+            if retries > self.max_retries:
+                raise ReportError('Exceeded max number of retries: %s', self.max_retries)
+
+        logging.info('The query finished refreshing after %s retries', retries)
+        if job['status'] == SUCCESS:
+            return '/' + str(job['query_result_id'])
+
+        raise ReportError('Query failed to refresh')
+
+    def format_parameters(self):
+        params = {}
+        if self.parameters:
+            params = {'p_' + key: val for (key, val) in six.iteritems(self.parameters)}
+        return params
 
 
 class BashReport(BasicReport):

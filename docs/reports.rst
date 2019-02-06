@@ -227,6 +227,11 @@ Redash
 -  api\_key: token to access the query, either for user or for query.
    You can find user's token in the profile, token for query can be
    found in the source page.
+-  refresh: True if you want an updated report. **Important**: For refresh
+   to work the api\_key must be of user type.
+-  parameters: Dictionary of query parameters. They should be written as
+   they are defined in the query. The p\_ needed for the url will be
+   prepended in the report.
 
 Example of a redash query:
 
@@ -238,6 +243,10 @@ Example of a redash query:
       "api_key": "some api key",
       "query_id": "123",
       "redash_url": "https://some.redash.com",
+      "refresh": true,
+      "parameters": {
+          "hello": "world"
+      },
       "results": [...]
     }
 
