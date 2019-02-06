@@ -49,7 +49,7 @@ with PostgreSQL. These are the configurations:
 -  query\_file: path to a file that contains plane sql code.
 -  connection: name of the connection to use.
 -  variables: A dictionary with values to replace in query code. You can
-   find further explanation in `Query templating <#query-templating>`__
+   find further explanation in :ref:`query-templating`.
 
 Example of a query report:
 
@@ -276,7 +276,11 @@ configurations are:
    have multiple reports with the same name, but only one
    report\_definition, which will be used for all of them.
 -  dateRangeType: if you use report\_definition from another report, you
-   can overwrite date range it uses with this configuration.
+   can overwrite date range it uses with this configuration. `Here <https://developers.google.com/adwords/api/docs/guides/reporting#date_ranges>`__
+   you can read more about date range types you can chose from.
+-  date_range: if dateRangeType is set to ``CUSTOM_DATE``, you can define a
+   custom range of dates to extract. The definition must be a dictionary with
+   min and max values. In both you can use relative dates with :ref:`filenames-templating`.
 -  `client\_customer\_id <https://support.google.com/adwords/answer/29198?hl=en>`__.
    Id or list of ids of adwords customers, whose data you want in the
    report.
@@ -288,10 +292,11 @@ Example of adwords query:
     {
       "name": "some_adwords_report",
       "type": "adwords",
+      "date_range": {"min": "{Y-1d}{m-1d}{d-1d}", "max": "{Y-1d}{m-1d}{d-1d}"},
       "client_customer_ids": "123-456-7890",
       "report_definition": {
         "reportName": "Shopping Performance Last Month",
-        "dateRangeType": "THIS_MONTH",
+        "dateRangeType": "CUSTOM_DATE",
         "reportType": "SHOPPING_PERFORMANCE_REPORT",
         "downloadFormat": "CSV",
         "selector": {
@@ -344,6 +349,10 @@ Configuration:
    Insights API documentation to discover what parameters you can use.
 -  sleep_per_tick: Number of seconds to wait between requests to Facebook API
    to check if the job is finished.
+-  since: Starting date for a custom date range. Will only be used if
+   ``date_preset``, ``time_range`` or ``time_ranges`` are not present among
+   report parameters. You can set relative dates using :ref:`filenames-templating`.
+-  until: Same as since, but for the ending date.
 
 Example of facebook report:
 
@@ -354,13 +363,14 @@ Example of facebook report:
         "type": "facebook",
         "profile": "my_facebook_profile",
         "object_id": "foo_1234567890123456",
+        "since": "{Y-1d}-{m-1d}-{d-1d}",
+        "until": "{Y-1d}-{m-1d}-{d-1d}",
         "params": {
             'level': 'ad',
             'limit': 10000000,
             'filtering': '[{"operator": "NOT_IN", "field": "ad.effective_status", "value": ["DELETED"]}]',
             'fields': 'impressions,reach',
-            'action_attribution_windows': '28d_click',
-            'date_preset': 'last_30d'
+            'action_attribution_windows': '28d_click'
         },
         "results": [...]
     }
