@@ -229,7 +229,9 @@ Redash
    found in the source page.
 -  refresh: True if you want an updated report. **Important**: For refresh
    to work the api\_key must be of user type.
--  parameters: Dictionary of query parameters.
+-  parameters: Dictionary of query parameters. They should be written as
+   they are defined in the query. The p\_ needed for the url will be
+   prepended in the report.
 
 Example of a redash query:
 
