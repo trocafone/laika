@@ -423,6 +423,7 @@ class AdwordsReport(BasicReport):
     Resulting report is always returned as buffer.
     """
     dateRangeType = None
+    date_range = {'min': '{Y-1d}{m-1d}{d-1d}', 'max': '{Y-1d}{m-1d}{d-1d}'}
 
     adwords_service_version = 'v201806'
 
@@ -430,14 +431,22 @@ class AdwordsReport(BasicReport):
         self.report_definition = None
         super(AdwordsReport, self).__init__(*args, **kwargs)
 
+        self.formatter = FilenameFormatter(*args)
+
         if self.report_definition is None:
             self.report_definition = self.load_report(self.reportName)
 
         if not isinstance(self.client_customer_ids, (list, tuple)):
             self.client_customer_ids = [self.client_customer_ids]
 
-        date_range = self.dateRangeType or self.report_definition['dateRangeType']
-        self.report_definition['dateRangeType'] = date_range
+        date_range_type = self.dateRangeType or self.report_definition['dateRangeType']
+        self.report_definition['dateRangeType'] = date_range_type
+
+        if date_range_type == 'CUSTOM_DATE':
+            self.report_definition['selector']['dateRange'] = {
+                'min': self.formatter.format(self.date_range['min']),
+                'max': self.formatter.format(self.date_range['max'])
+            }
 
         from googleads import adwords
 
@@ -485,14 +494,15 @@ class FacebookInsightsReport(BasicReport):
         'limit': 10000000,
         'filtering': '[{"operator": "NOT_IN", "field": "ad.effective_status", "value": ["DELETED"]}]',
         'fields': 'impressions,reach',
-        'action_attribution_windows': '28d_click',
-        'date_preset': 'last_30d'
+        'action_attribution_windows': '28d_click'
     }
     api_version = 'v3.0'
     base_url = 'https://graph.facebook.com/{}/{}'
     endpoint = '/insights'
     job_results_limit = 500
     sleep_per_tick = 60
+    since = '{Y-1d}-{m-1d}-{d-1d}'
+    until = '{Y-1d}-{m-1d}-{d-1d}'
 
     def __init__(self, *args, **kwargs):
         self.object_id = None
@@ -502,6 +512,13 @@ class FacebookInsightsReport(BasicReport):
 
         d = self.defaults.copy()
         d.update(self.params)
+
+        if not any(k in d for k in ('date_preset', 'time_range', 'time_ranges')):
+            since = self.formatter.format(self.since)
+            until = self.formatter.format(self.until)
+            time_range = '{"since":"{}","until":"{}"}'.format(since, until)
+            d.update({'time_range': time_range})
+
         self.params = d
 
         self.access_token = get_json_credentials(self)['access_token']
