@@ -651,6 +651,62 @@ class FacebookInsightsReport(BasicReport):
         return result
 
 
+class RTBHouseReport(FormattedReport):
+    """
+    Retrieves marketing campaigns' costs for all the campaigns (advertisers)
+    for your account.
+
+    Requires rtbhouse_sdk package.
+    """
+    group_by = None
+    convention_type = None
+
+    campaign_names = {}
+    column_names = {}
+
+    def __init__(self, conf, **kwargs):
+        super(RTBHouseReport, self).__init__(conf, **kwargs)
+        from rtbhouse_sdk.reports_api import ReportsApiSession
+
+        logging.info('Starting RTBHouse report acquisition.')
+        self.formatter = FilenameFormatter(conf)
+
+        creds = get_json_credentials(self)
+        self.api = ReportsApiSession(creds['username'], creds['password'])
+
+    def process(self):
+        stats = []
+        for advertiser in self.get_campaigns_info():
+            advertiser_stats = self.get_campaigns_stats(advertiser['hash'])
+            for advertiser_stat in advertiser_stats:
+                advertiser_stat.update(advertiser)
+            stats += advertiser_stats
+
+        logging.info('{} campaigns costs fetched.'.format(len(stats)))
+
+        costs_df = pd.DataFrame(stats)
+        for campaign_id, campaign_name in self.campaign_names.items():
+            costs_df.loc[costs_df['hash']==campaign_id, 'name'] = campaign_name
+
+        costs_df.rename(columns=self.column_names, inplace=True)
+        return costs_df
+
+    def get_campaigns_info(self):
+        logging.info('Acquiring account campaigns.')
+        advertisers = self.api.get_advertisers()
+        logging.debug('{} campaigns available.'.format(len(advertisers)))
+        return advertisers
+
+    def get_campaigns_stats(self, campaign_id):
+        logging.info('Acquiring {} campaign stats.'.format(str(campaign_id)))
+        campaign_stats = self.api.get_campaign_stats_total(campaign_id,
+                                                           self.formatter.format(self.day_from),
+                                                           self.formatter.format(self.day_to),
+                                                           self.group_by,
+                                                           self.convention_type)
+        return list(campaign_stats)
+
+
 class RakutenReport(FormattedReport):
     """
     Rakuten marketing reports acquisition.
@@ -1272,6 +1328,7 @@ class Config(dict):
         'trackeame': TrackeameReport,
         'drive': DownloadFromGoogleDrive,
         's3': DownloadFromS3,
+        'rtbhouse': RTBHouseReport,
         'rakuten': RakutenReport
     }
     _result_map = {
