@@ -1271,7 +1271,8 @@ class Config(dict):
         'facebook': FacebookInsightsReport,
         'trackeame': TrackeameReport,
         'drive': DownloadFromGoogleDrive,
-        's3': DownloadFromS3
+        's3': DownloadFromS3,
+        'rakuten': RakutenReport
     }
     _result_map = {
         'module': ModuleResult,
