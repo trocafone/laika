@@ -5,6 +5,7 @@ import imp
 import pytz
 import json
 import datetime as dt
+import numpy as np
 import pandas as pd
 import ftplib
 import logging
@@ -1304,6 +1305,34 @@ class UploadToS3(FileResult):
         self.s3.put_object(Bucket=self.bucket, Key=filename, Body=data)
 
 
+class FixedColumnarResult(Result):
+    """
+    Wrapper result that ensures the presence of a list of columns in the data
+    before sending them to an inner result. If a column is not present in the
+    data, a column is added and filled with some value (np.nan by default).
+
+    The data is expected to be a pandas.DataFrame or should be acceptable
+    by the DataFrame's constructor.
+    """
+
+    columns = []
+    default_value = np.nan
+
+    def __init__(self, conf, data, **kwargs):
+        super(FixedColumnarResult, self).__init__(conf, data, **kwargs)
+
+        if not isinstance(data, pd.DataFrame):
+            data = pd.DataFrame(self.data)
+        for column in self.columns:
+            data[column] = data.get(column, self.default_value)
+
+        inner_result_class = conf.get_result_class(self.inner_result_type)
+        self._inner_result = inner_result_class(conf, data[self.columns], **kwargs)
+
+    def save(self):
+        self._inner_result.save()
+
+
 class Config(dict):
     """
     Config dict with methods to retrieve some predefined configurations.
@@ -1339,7 +1368,8 @@ class Config(dict):
         'sftp': UploadToSftp,
         'drive': UploadToGoogleDrive,
         'redash': RedashResult,
-        's3': UploadToS3
+        's3': UploadToS3,
+        'fixed': FixedColumnarResult
     }
 
     def __init__(self, config, pwd=None):

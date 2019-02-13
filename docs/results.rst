@@ -192,6 +192,44 @@ fields as `File <#file>`__ result, with the exception of the fact that
 the file must be json (it will be saved as json, regardless of the
 extension).
 
+
+Fixed Columnar Result
+^^^^^^^^^^^^^^^^^^^^^
+
+``type: fixed``. Wrapper result that ensures the presence of a list of columns
+in the data before sending them to an inner result. Columns not present in the
+data will be added. Can only be used with reports that return a ``pandas.DataFrame``
+as result (or some data structure accepted by DataFrame's constructor). All the
+configuration keys, besides ones this result defines, will be passed to the
+inner result.
+
+Configuration:
+
+-  columns: List of columns to ensure in the data, in the order you want them
+   to appear for the inner result.
+-  inner_result_type: Type of result to use after fixing the data.
+-  default_value: This value will be used to fill missing columns with
+   (``np.nan`` by default).
+
+
+Example of fixed columnar result:
+
+.. code:: json
+
+    {
+      "type": "fixed",
+      "columns": ["id", "date", "action", "value", "missing_column"],
+      "default_value": "value_to_fill_missing_column_with",
+      "inner_result_type": "file",
+      "filename": "resulting_output.csv"
+    }
+
+
+As you can see in the example, you define both configurations for the fixed
+columnar result, and the result it wraps (in this case a file result, with it's
+corresponding filename).
+
+
 Module
 ^^^^^^
 
