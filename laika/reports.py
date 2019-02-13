@@ -651,6 +651,44 @@ class FacebookInsightsReport(BasicReport):
         return result
 
 
+class RakutenReport(FormattedReport):
+    """
+    Rakuten marketing reports acquisition.
+    The reported specified by name is requested to Rakuten API with the
+    corresponding filters defined by the user.
+    https://advhelp.rakutenmarketing.com/hc/en-us/articles/206630745
+    """
+    filters = {}
+    url_template = 'https://ran-reporting.rakutenmarketing.com/en/reports/{report_name}/filters'
+
+    def __init__(self, conf, *args, **kwargs):
+        super(RakutenReport, self).__init__(conf, *args, **kwargs)
+        msg = 'Starting Rakuten "{report_name}" report acquisition.'
+        logging.info(msg.format(report_name=self.report_name))
+        self.formatter = FilenameFormatter(conf)
+
+        self.token = get_json_credentials(self)['token']
+
+    def process(self):
+        params = {k: self.formatter.format(v) for k, v in self.filters.items()}
+
+        msg = 'Requesting {report_name} report with {filters} filters.'
+        logging.info(msg.format(report_name=self.report_name, filters=params))
+
+        params['token'] = self.token
+        url = self.url_template.format(report_name=self.report_name)
+        response = requests.get(url, params=params)
+
+        result = six.BytesIO(response.content)
+        result.seek(0)
+        report_df = pd.read_csv(result)
+
+        msg = 'Report {report_name} downloaded. {lines} lines fetched.'
+        logging.info(msg.format(report_name=self.report_name, lines=len(report_df)))
+
+        return report_df
+
+
 class DownloadFromS3(FileReport):
     """
     Downloads an object from Amazon S3. Object's location is defined by bucket
@@ -1233,7 +1271,8 @@ class Config(dict):
         'facebook': FacebookInsightsReport,
         'trackeame': TrackeameReport,
         'drive': DownloadFromGoogleDrive,
-        's3': DownloadFromS3
+        's3': DownloadFromS3,
+        'rakuten': RakutenReport
     }
     _result_map = {
         'module': ModuleResult,

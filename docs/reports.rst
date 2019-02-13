@@ -376,6 +376,37 @@ Example of facebook report:
     }
 
 
+Rakuten
+^^^^^^^
+
+``type: rakuten``. Downloads a report from Rakuten marketing platform by name.
+
+Configuration:
+
+-  profile: Name of profile to use. Credentials file must be a json containing
+   ``token`` key, with a token to access Rakuten API.
+-  report_name: Existing report to download from the platform.
+-  filters: A set of filters to send to the API. Must be a dictionay, you can
+   use :ref:`filenames-templating` on the values.
+
+Example of rakuten report:
+
+.. code:: json
+
+    {
+      "name": "my_rakuten_report",
+      "type": "rakuten",
+      "profile": "my_rakuten_profile",
+      "report_name": "some-report",
+      "filters": {
+        "start_date": "{Y-10d}-{m-10d}-{d-10d}",
+        "end_date": "{Y-1d}-{m-1d}-{d-1d}",
+        "include_summary": "N",
+        "date_type": "transaction"
+      }
+    }
+
+
 Module
 ^^^^^^
 
