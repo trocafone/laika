@@ -201,7 +201,8 @@ in the data before sending them to an inner result. Columns not present in the
 data will be added. Can only be used with reports that return a ``pandas.DataFrame``
 as result (or some data structure accepted by DataFrame's constructor). All the
 configuration keys, besides ones this result defines, will be passed to the
-inner result.
+inner result. Can be useful if you need to adapt the data to some external
+format (i.e. Hive schema).
 
 Configuration:
 
