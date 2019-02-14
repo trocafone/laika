@@ -25,8 +25,9 @@ drive = ['PyDrive==1.3.1']
 adwords = ['googleads==12.2.0']
 s3 = ['boto3==1.4.3']
 sftp = ['paramiko==2.0.1']
+rtbhouse = ['rtbhouse_sdk==3.0.1']
 
-all_reports = excel + postgres + presto + drive + adwords + s3 + sftp
+all_reports = excel + postgres + presto + drive + adwords + s3 + sftp + rtbhouse
 
 test = ['mock==1.3.0']
 docs = ['Sphinx>=1.7.1', 'sphinx-rtd-theme>=0.2.4']
@@ -71,6 +72,7 @@ setup(
         'adwords': adwords,
         's3': s3,
         'sftp': sftp,
+        'rtbhouse': rtbhouse,
 
         'all_reports': all_reports,
 

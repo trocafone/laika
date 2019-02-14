@@ -55,6 +55,9 @@ def run(ctx, report, run_all, config, show_list, loglevel, pwd):
                     '\n\t- '.join(sorted(conf.get_available_reports()))) + '\n')
 
     extra_args = dict(zip(*2 * [iter(a.replace('--', '') for a in ctx.args)]))
+
+    conf.overwrite_attributes(extra_args)
+
     runner = laika.Runner(conf, **extra_args)
     if report:
         runner.run_report(report)

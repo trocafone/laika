@@ -5,6 +5,7 @@ import imp
 import pytz
 import json
 import datetime as dt
+import numpy as np
 import pandas as pd
 import ftplib
 import logging
@@ -140,7 +141,8 @@ class ReportFormatter(object):
     def get_now(self):
         tz = getattr(self, 'timezone', None) or self.conf.timezone
         tz = pytz.timezone(tz) if tz else pytz.utc
-        return datetime.now(tz)
+        return tz.localize(datetime.strptime(self.conf.now, '%Y-%m-%d %H:%M:%S')
+                           if self.conf.now is not None else datetime.now())
 
     def format(self, report_string):
         """
@@ -303,7 +305,14 @@ class RedashReport(FormattedReport):
     Retrieves data from re:dash API. Makes a GET request to the endpoint.
     Needs redash_url, query_id and api_key in order to work (api_key can be
     for query or for user).
+    If refresh set to True, makes a POST request to refresh the query and
+    waits for the response before moving forward. The api_key must be of the
+    user type for this to work.
     """
+    refresh = False
+    max_retries = 60
+    sleep_time = 1
+    parameters = {}
 
     def __init__(self, *args, **kwargs):
         self.api_key = None
@@ -314,12 +323,50 @@ class RedashReport(FormattedReport):
     def process(self):
         logging.info('Retrieving query %s from %s', self.query_id,
                      self.redash_url)
-        path = ('{}/api/queries/{}/results.json?api_key={}'.format(
-            self.redash_url, self.query_id, self.api_key))
+        requests_session = requests.Session()
+        requests_session.headers.update({'Authorization': 'Key {}'.format(self.api_key)})
+        result_id = ''
+        if self.refresh:
+            result_id = self.refresh_query(requests_session)
 
-        response = requests.get(path)
+        path = '{}/api/queries/{}/results{}.json'.format(self.redash_url,
+                                                         self.query_id,
+                                                         result_id)
+        response = requests_session.get(path, params=self.format_parameters())
+
         data = response.json()['query_result']['data']
         return pd.DataFrame(data['rows'])
+
+    def refresh_query(self, requests_session):
+        logging.info('Refreshing query')
+        path = '{}/api/queries/{}/refresh'.format(self.redash_url, self.query_id)
+        response = requests_session.post(path, params=self.format_parameters())
+
+        return self.poll_job(requests_session, response.json()['job'])
+
+    def poll_job(self, requests_session, job):
+        SUCCESS = 3
+        FAILURE = 4
+        retries = 0
+        while job['status'] not in (SUCCESS, FAILURE):
+            response = requests_session.get('{}/api/jobs/{}'.format(self.redash_url, job['id']))
+            job = response.json()['job']
+            time.sleep(self.sleep_time)
+            retries += 1
+            if retries > self.max_retries:
+                raise ReportError('Exceeded max number of retries: %s', self.max_retries)
+
+        logging.info('The query finished refreshing after %s retries', retries)
+        if job['status'] == SUCCESS:
+            return '/' + str(job['query_result_id'])
+
+        raise ReportError('Query failed to refresh')
+
+    def format_parameters(self):
+        params = {}
+        if self.parameters:
+            params = {'p_' + key: val for (key, val) in six.iteritems(self.parameters)}
+        return params
 
 
 class BashReport(BasicReport):
@@ -422,6 +469,7 @@ class AdwordsReport(BasicReport):
     Resulting report is always returned as buffer.
     """
     dateRangeType = None
+    date_range = {'min': '{Y-1d}{m-1d}{d-1d}', 'max': '{Y-1d}{m-1d}{d-1d}'}
 
     adwords_service_version = 'v201806'
 
@@ -429,14 +477,22 @@ class AdwordsReport(BasicReport):
         self.report_definition = None
         super(AdwordsReport, self).__init__(*args, **kwargs)
 
+        self.formatter = FilenameFormatter(*args)
+
         if self.report_definition is None:
             self.report_definition = self.load_report(self.reportName)
 
         if not isinstance(self.client_customer_ids, (list, tuple)):
             self.client_customer_ids = [self.client_customer_ids]
 
-        date_range = self.dateRangeType or self.report_definition['dateRangeType']
-        self.report_definition['dateRangeType'] = date_range
+        date_range_type = self.dateRangeType or self.report_definition['dateRangeType']
+        self.report_definition['dateRangeType'] = date_range_type
+
+        if date_range_type == 'CUSTOM_DATE':
+            self.report_definition['selector']['dateRange'] = {
+                'min': self.formatter.format(self.date_range['min']),
+                'max': self.formatter.format(self.date_range['max'])
+            }
 
         from googleads import adwords
 
@@ -484,23 +540,32 @@ class FacebookInsightsReport(BasicReport):
         'limit': 10000000,
         'filtering': '[{"operator": "NOT_IN", "field": "ad.effective_status", "value": ["DELETED"]}]',
         'fields': 'impressions,reach',
-        'action_attribution_windows': '28d_click',
-        'date_preset': 'last_30d'
+        'action_attribution_windows': '28d_click'
     }
-    api_version = 'v3.0'
+    api_version = 'v3.1'
     base_url = 'https://graph.facebook.com/{}/{}'
     endpoint = '/insights'
     job_results_limit = 500
     sleep_per_tick = 60
+    since = '{Y-1d}-{m-1d}-{d-1d}'
+    until = '{Y-1d}-{m-1d}-{d-1d}'
 
     def __init__(self, *args, **kwargs):
         self.object_id = None
         super(FacebookInsightsReport, self).__init__(*args, **kwargs)
+        self.formatter = FilenameFormatter(*args)
 
         self.url = self.base_url + self.endpoint
 
         d = self.defaults.copy()
         d.update(self.params)
+
+        if not any(k in d for k in ('date_preset', 'time_range', 'time_ranges')):
+            since = self.formatter.format(self.since)
+            until = self.formatter.format(self.until)
+            time_range = '"since":"{}","until":"{}"'.format(since, until)
+            d.update({'time_range': '{' + time_range + '}'})
+
         self.params = d
 
         self.access_token = get_json_credentials(self)['access_token']
@@ -586,6 +651,100 @@ class FacebookInsightsReport(BasicReport):
 
         logging.info('Finished retreiving results')
         return result
+
+
+class RTBHouseReport(FormattedReport):
+    """
+    Retrieves marketing campaigns' costs for all the campaigns (advertisers)
+    for your account.
+
+    Requires rtbhouse_sdk package.
+    """
+    group_by = None
+    convention_type = None
+
+    campaign_names = {}
+    column_names = {}
+
+    def __init__(self, conf, **kwargs):
+        super(RTBHouseReport, self).__init__(conf, **kwargs)
+        from rtbhouse_sdk.reports_api import ReportsApiSession
+
+        logging.info('Starting RTBHouse report acquisition.')
+        self.formatter = FilenameFormatter(conf)
+
+        creds = get_json_credentials(self)
+        self.api = ReportsApiSession(creds['username'], creds['password'])
+
+    def process(self):
+        stats = []
+        for advertiser in self.get_campaigns_info():
+            advertiser_stats = self.get_campaigns_stats(advertiser['hash'])
+            for advertiser_stat in advertiser_stats:
+                advertiser_stat.update(advertiser)
+            stats += advertiser_stats
+
+        logging.info('{} campaigns costs fetched.'.format(len(stats)))
+
+        costs_df = pd.DataFrame(stats)
+        for campaign_id, campaign_name in self.campaign_names.items():
+            costs_df.loc[costs_df['hash']==campaign_id, 'name'] = campaign_name
+
+        costs_df.rename(columns=self.column_names, inplace=True)
+        return costs_df
+
+    def get_campaigns_info(self):
+        logging.info('Acquiring account campaigns.')
+        advertisers = self.api.get_advertisers()
+        logging.debug('{} campaigns available.'.format(len(advertisers)))
+        return advertisers
+
+    def get_campaigns_stats(self, campaign_id):
+        logging.info('Acquiring {} campaign stats.'.format(str(campaign_id)))
+        campaign_stats = self.api.get_campaign_stats_total(campaign_id,
+                                                           self.formatter.format(self.day_from),
+                                                           self.formatter.format(self.day_to),
+                                                           self.group_by,
+                                                           self.convention_type)
+        return list(campaign_stats)
+
+
+class RakutenReport(FormattedReport):
+    """
+    Rakuten marketing reports acquisition.
+    The reported specified by name is requested to Rakuten API with the
+    corresponding filters defined by the user.
+    https://advhelp.rakutenmarketing.com/hc/en-us/articles/206630745
+    """
+    filters = {}
+    url_template = 'https://ran-reporting.rakutenmarketing.com/en/reports/{report_name}/filters'
+
+    def __init__(self, conf, *args, **kwargs):
+        super(RakutenReport, self).__init__(conf, *args, **kwargs)
+        msg = 'Starting Rakuten "{report_name}" report acquisition.'
+        logging.info(msg.format(report_name=self.report_name))
+        self.formatter = FilenameFormatter(conf)
+
+        self.token = get_json_credentials(self)['token']
+
+    def process(self):
+        params = {k: self.formatter.format(v) for k, v in self.filters.items()}
+
+        msg = 'Requesting {report_name} report with {filters} filters.'
+        logging.info(msg.format(report_name=self.report_name, filters=params))
+
+        params['token'] = self.token
+        url = self.url_template.format(report_name=self.report_name)
+        response = requests.get(url, params=params)
+
+        result = six.BytesIO(response.content)
+        result.seek(0)
+        report_df = pd.read_csv(result)
+
+        msg = 'Report {report_name} downloaded. {lines} lines fetched.'
+        logging.info(msg.format(report_name=self.report_name, lines=len(report_df)))
+
+        return report_df
 
 
 class DownloadFromS3(FileReport):
@@ -1147,6 +1306,34 @@ class UploadToS3(FileResult):
         self.s3.put_object(Bucket=self.bucket, Key=filename, Body=data)
 
 
+class FixedColumnarResult(Result):
+    """
+    Wrapper result that ensures the presence of a list of columns in the data
+    before sending them to an inner result. If a column is not present in the
+    data, a column is added and filled with some value (np.nan by default).
+
+    The data is expected to be a pandas.DataFrame or should be acceptable
+    by the DataFrame's constructor.
+    """
+
+    columns = []
+    default_value = np.nan
+
+    def __init__(self, conf, data, **kwargs):
+        super(FixedColumnarResult, self).__init__(conf, data, **kwargs)
+
+        if not isinstance(data, pd.DataFrame):
+            data = pd.DataFrame(self.data)
+        for column in self.columns:
+            data[column] = data.get(column, self.default_value)
+
+        inner_result_class = conf.get_result_class(self.inner_result_type)
+        self._inner_result = inner_result_class(conf, data[self.columns], **kwargs)
+
+    def save(self):
+        self._inner_result.save()
+
+
 class Config(dict):
     """
     Config dict with methods to retrieve some predefined configurations.
@@ -1170,7 +1357,9 @@ class Config(dict):
         'facebook': FacebookInsightsReport,
         'trackeame': TrackeameReport,
         'drive': DownloadFromGoogleDrive,
-        's3': DownloadFromS3
+        's3': DownloadFromS3,
+        'rtbhouse': RTBHouseReport,
+        'rakuten': RakutenReport
     }
     _result_map = {
         'module': ModuleResult,
@@ -1180,7 +1369,8 @@ class Config(dict):
         'sftp': UploadToSftp,
         'drive': UploadToGoogleDrive,
         'redash': RedashResult,
-        's3': UploadToS3
+        's3': UploadToS3,
+        'fixed': FixedColumnarResult
     }
 
     def __init__(self, config, pwd=None):
@@ -1188,8 +1378,9 @@ class Config(dict):
             config = json.load(open(config))
 
         self._conf = config
-        for key in ['timezone', 'pwd']:
-            setattr(self, key, self._conf.get(key, None))
+
+        self._global_config_fields = ['timezone', 'pwd', 'now']
+        self.overwrite_attributes(self._conf)
 
         self.pwd = self.pwd or pwd
         if self.pwd:
@@ -1227,6 +1418,14 @@ class Config(dict):
 
     def get_available_reports(self):
         return self['reports'].keys()
+
+    def overwrite_attributes(self, new_attributes):
+        """
+        Overwrites global configurations with a passed dictionary.
+        Only overwrites predefined fields.
+        """
+        for key in self._global_config_fields:
+            setattr(self, key, new_attributes.get(key, None))
 
 
 class Runner(object):

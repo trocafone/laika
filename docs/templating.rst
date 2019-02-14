@@ -57,6 +57,8 @@ Another possibility is to specify a start of week with ``{f}``. For
 example, ``{d-1f}`` will move the date to Monday of the current week,
 and ``{d+2f}`` will move the date to Monday within two weeks.
 
+.. _query-templating:
+
 Query templating
 ~~~~~~~~~~~~~~~~
 
@@ -96,6 +98,8 @@ dates, so you can define in your configuration variables like this:
     }
 
 ``{yesterday}`` will be converted into ``2016-02-12 17:19:09``.
+
+.. _filenames-templating:
 
 Filenames templating
 ~~~~~~~~~~~~~~~~~~~~

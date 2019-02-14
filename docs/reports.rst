@@ -52,7 +52,7 @@ with PostgreSQL and Presto. These are the configurations:
 -  query\_file: path to a file that contains plane sql code.
 -  connection: name of the connection to use.
 -  variables: A dictionary with values to replace in query code. You can
-   find further explanation in `Query templating <#query-templating>`__
+   find further explanation in :ref:`query-templating`.
 
 Example of a query report:
 
@@ -230,6 +230,11 @@ Redash
 -  api\_key: token to access the query, either for user or for query.
    You can find user's token in the profile, token for query can be
    found in the source page.
+-  refresh: True if you want an updated report. **Important**: For refresh
+   to work the api\_key must be of user type.
+-  parameters: Dictionary of query parameters. They should be written as
+   they are defined in the query. The p\_ needed for the url will be
+   prepended in the report.
 
 Example of a redash query:
 
@@ -241,6 +246,10 @@ Example of a redash query:
       "api_key": "some api key",
       "query_id": "123",
       "redash_url": "https://some.redash.com",
+      "refresh": true,
+      "parameters": {
+          "hello": "world"
+      },
       "results": [...]
     }
 
@@ -270,7 +279,11 @@ configurations are:
    have multiple reports with the same name, but only one
    report\_definition, which will be used for all of them.
 -  dateRangeType: if you use report\_definition from another report, you
-   can overwrite date range it uses with this configuration.
+   can overwrite date range it uses with this configuration. `Here <https://developers.google.com/adwords/api/docs/guides/reporting#date_ranges>`__
+   you can read more about date range types you can chose from.
+-  date_range: if dateRangeType is set to ``CUSTOM_DATE``, you can define a
+   custom range of dates to extract. The definition must be a dictionary with
+   min and max values. In both you can use relative dates with :ref:`filenames-templating`.
 -  `client\_customer\_id <https://support.google.com/adwords/answer/29198?hl=en>`__.
    Id or list of ids of adwords customers, whose data you want in the
    report.
@@ -282,10 +295,11 @@ Example of adwords query:
     {
       "name": "some_adwords_report",
       "type": "adwords",
+      "date_range": {"min": "{Y-1d}{m-1d}{d-1d}", "max": "{Y-1d}{m-1d}{d-1d}"},
       "client_customer_ids": "123-456-7890",
       "report_definition": {
         "reportName": "Shopping Performance Last Month",
-        "dateRangeType": "THIS_MONTH",
+        "dateRangeType": "CUSTOM_DATE",
         "reportType": "SHOPPING_PERFORMANCE_REPORT",
         "downloadFormat": "CSV",
         "selector": {
@@ -338,6 +352,10 @@ Configuration:
    Insights API documentation to discover what parameters you can use.
 -  sleep_per_tick: Number of seconds to wait between requests to Facebook API
    to check if the job is finished.
+-  since: Starting date for a custom date range. Will only be used if
+   ``date_preset``, ``time_range`` or ``time_ranges`` are not present among
+   report parameters. You can set relative dates using :ref:`filenames-templating`.
+-  until: Same as since, but for the ending date.
 
 Example of facebook report:
 
@@ -348,15 +366,93 @@ Example of facebook report:
         "type": "facebook",
         "profile": "my_facebook_profile",
         "object_id": "foo_1234567890123456",
+        "since": "{Y-1d}-{m-1d}-{d-1d}",
+        "until": "{Y-1d}-{m-1d}-{d-1d}",
         "params": {
             'level': 'ad',
             'limit': 10000000,
             'filtering': '[{"operator": "NOT_IN", "field": "ad.effective_status", "value": ["DELETED"]}]',
             'fields': 'impressions,reach',
-            'action_attribution_windows': '28d_click',
-            'date_preset': 'last_30d'
+            'action_attribution_windows': '28d_click'
         },
         "results": [...]
+    }
+
+
+RTBHouse
+^^^^^^^
+
+.. note:: To use rtbhouse report you must install ``rtbhouse`` dependency:
+    ``pip install laika-lib[rtbhouse]``
+
+``type: rtbhouse``. Downloads marketing costs report from RTBHouse API.
+Reported campaigns (advertisers) are all those created by the account.
+
+Configuration:
+
+-  profile: Name of profile to use. Credentials file must be a json containing
+   ``username`` and ``password`` fields.
+-  day_from: Starting date for the period to retrieve costs for. You can set
+   a relative date using :ref:`filenames-templating`.
+-  day_to: Same as day_from, but for the ending date.
+-  group_by and convention_type: Optional parameters to send to RTBHouse.
+-  campaign_names: Mapping from campaign hash to a readable name for the
+   resulting report.
+-  column_names: Mapping to rename columns in the resulting report.
+
+Example of rtbhouse report:
+
+.. code:: json
+
+    {
+      "name": "my_rtbhouse_report",
+      "type": "rtbhouse",
+      "profile": "my_rtbhouse_profile",
+      "group_by": "day",
+      "convention_type": "ATTRIBUTED",
+      "day_from": "{Y-1d}-{m-1d}-{d-1d}",
+      "day_to": "{Y-1d}-{m-1d}-{d-1d}",
+      "campaign_names": {
+        "1234567890": "Some readable campaign name"
+      },
+      "column_names": {
+        "hash": "CampaignID",
+        "name": "Campaign",
+        "campaignCost": "Cost",
+        "day": "Date"
+      },
+      "results": [...]
+    }
+
+
+Rakuten
+^^^^^^^
+
+``type: rakuten``. Downloads a report from Rakuten marketing platform by name.
+
+Configuration:
+
+-  profile: Name of profile to use. Credentials file must be a json containing
+   ``token`` key, with a token to access Rakuten API.
+-  report_name: Existing report to download from the platform.
+-  filters: A set of filters to send to the API. Must be a dictionay, you can
+   use :ref:`filenames-templating` on the values.
+
+Example of rakuten report:
+
+.. code:: json
+
+    {
+      "name": "my_rakuten_report",
+      "type": "rakuten",
+      "profile": "my_rakuten_profile",
+      "report_name": "some-report",
+      "filters": {
+        "start_date": "{Y-10d}-{m-10d}-{d-10d}",
+        "end_date": "{Y-1d}-{m-1d}-{d-1d}",
+        "include_summary": "N",
+        "date_type": "transaction"
+      }
     }
 
 
