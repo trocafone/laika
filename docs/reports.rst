@@ -376,6 +376,52 @@ Example of facebook report:
     }
 
 
+RTBHouse
+^^^^^^^
+
+.. note:: To use rtbhouse report you must install ``rtbhouse`` dependency:
+    ``pip install laika-lib[rtbhouse]``
+
+``type: rtbhouse``. Downloads marketing costs report from RTBHouse API.
+Reported campaigns (advertisers) are all those created by the account.
+
+Configuration:
+
+-  profile: Name of profile to use. Credentials file must be a json containing
+   ``username`` and ``password`` fields.
+-  day_from: Starting date for the period to retrieve costs for. You can set
+   a relative date using :ref:`filenames-templating`.
+-  day_to: Same as day_from, but for the ending date.
+-  group_by and convention_type: Optional parameters to send to RTBHouse.
+-  campaign_names: Mapping from campaign hash to a readable name for the
+   resulting report.
+-  column_names: Mapping to rename columns in the resulting report.
+
+Example of rtbhouse report:
+
+.. code:: json
+
+    {
+      "name": "my_rtbhouse_report",
+      "type": "rtbhouse",
+      "profile": "my_rtbhouse_profile",
+      "group_by": "day",
+      "convention_type": "ATTRIBUTED",
+      "day_from": "{Y-1d}-{m-1d}-{d-1d}",
+      "day_to": "{Y-1d}-{m-1d}-{d-1d}",
+      "campaign_names": {
+        "1234567890": "Some readable campaign name"
+      },
+      "column_names": {
+        "hash": "CampaignID",
+        "name": "Campaign",
+        "campaignCost": "Cost",
+        "day": "Date"
+      },
+      "results": [...]
+    }
+
+
 Rakuten
 ^^^^^^^
 
