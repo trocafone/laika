@@ -18,9 +18,9 @@ with open('README.md') as f:
 
 
 excel = ['xlrd==1.1.0', 'XlsxWriter==0.8.4']
-query = ['SQLAlchemy==1.0.11']
-postgres = query + ['psycopg2==2.6.1']
-presto = query + ['PyHive==0.6.1']
+sql = ['SQLAlchemy==1.0.11']
+postgres = sql + ['psycopg2==2.6.1']
+presto = sql + ['PyHive==0.6.1']
 drive = ['PyDrive==1.3.1']
 adwords = ['googleads==12.2.0']
 s3 = ['boto3==1.4.3']
@@ -64,7 +64,7 @@ setup(
     tests_require=test,
     extras_require={
         'excel': excel,
-        'query': query,
+        'sql': sql,
         'postgres': postgres,
         'presto': presto,
         'drive': drive,
