@@ -20,12 +20,13 @@ with open('README.md') as f:
 excel = ['xlrd==1.1.0', 'XlsxWriter==0.8.4']
 query = ['SQLAlchemy==1.0.11']
 postgres = query + ['psycopg2==2.6.1']
+presto = query + ['PyHive==0.6.1']
 drive = ['PyDrive==1.3.1']
 adwords = ['googleads==12.2.0']
 s3 = ['boto3==1.4.3']
 sftp = ['paramiko==2.0.1']
 
-all_reports = excel + postgres + drive + adwords + s3 + sftp
+all_reports = excel + postgres + presto + drive + adwords + s3 + sftp
 
 test = ['mock==1.3.0']
 docs = ['Sphinx>=1.7.1', 'sphinx-rtd-theme>=0.2.4']
@@ -65,6 +66,7 @@ setup(
         'excel': excel,
         'query': query,
         'postgres': postgres,
+        'presto': presto,
         'drive': drive,
         'adwords': adwords,
         's3': s3,

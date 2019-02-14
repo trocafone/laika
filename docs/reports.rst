@@ -38,13 +38,16 @@ Query
 
 .. note:: To use query report you must install ``sql`` dependency (for
    Sqlalchemy): ``pip install laika-lib[sql]``.
-   You also have the libraries needed to access your specific database. The only
-   dependency that is currently predefined in laika is postgres:
-   ``pip install laika-lib[postgres]``
+   You also have the libraries needed to access your specific database.
+
+   For postgres: ``pip install laika-lib[postgres]``
+
+   For Presto(Pyhive): ``pip install laika-lib[presto]``
+
 
 ``type: query``. This report runs a query to some database. Should work
 with any database supported by Sqlalchemy but right now it's only tested
-with PostgreSQL. These are the configurations:
+with PostgreSQL and Presto. These are the configurations:
 
 -  query\_file: path to a file that contains plane sql code.
 -  connection: name of the connection to use.
