@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [1.2.0] - 2019-02-14
+## [1.2.0] - 2019-02-15
 
  - Added reports from RTBHouse and Rakuten
  - Added fixed columnar result
