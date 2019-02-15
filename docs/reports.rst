@@ -44,6 +44,9 @@ Query
 
    For Presto(Pyhive): ``pip install laika-lib[presto]``
 
+   We only tested it with postgres and Presto, but it should work with
+   all databases supported by SQLAlchemy.
+
 
 ``type: query``. This report runs a query to some database. Should work
 with any database supported by Sqlalchemy but right now it's only tested

@@ -74,7 +74,7 @@ Postgres
 
     {
       "name": "local",
-      "type": "postgre",
+      "type": "sqlalchemy",
       "constring": "postgresql://user@localhost:5432/database"
     }
 
@@ -84,7 +84,7 @@ Presto
 
     {
       "name": "local",
-      "type": "presto",
+      "type": "sqlalchemy",
       "constring": "presto://user@localhost:8889/default"
     }
 
