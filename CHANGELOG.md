@@ -11,6 +11,8 @@
  - Added a parameter/configuration to override current date.
  - Updated Facebook API version to 3.1
  - Updated required requests version to >= 2.21.0
+ - Updated required SQLAlchemy version to == 1.2.17
+ - Added presto optional dependency
 
 ## [1.1.1] - 2018-09-10
 
