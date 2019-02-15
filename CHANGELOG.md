@@ -2,7 +2,19 @@
 
 ## [Unreleased]
 
-## [1.1.1]
+## [1.2.0] - 2019-02-15
+
+ - Added reports from RTBHouse and Rakuten
+ - Added fixed columnar result
+ - Added a possiblity to configure Adwords and Facebook reports with relative dates.
+ - Added an option to refresh a Redash query before downloading
+ - Added a parameter/configuration to override current date.
+ - Updated Facebook API version to 3.1
+ - Updated required requests version to >= 2.21.0
+ - Updated required SQLAlchemy version to == 1.2.17
+ - Added presto optional dependency
+
+## [1.1.1] - 2018-09-10
 
  - Added password parameter to SFTP result
  - Fixed mime_type parameter for Google Drive result
