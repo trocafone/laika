@@ -63,17 +63,29 @@ Connections are used to access data sources or destinations. They must
 have a *name* and a *type*, and a set of specific fields. Currently
 supported connections are described below.
 
-Postgres
+Database
 ^^^^^^^^
 
-PostgreSQL database connection is defined like this:
+Database connection examples:
+
+Postgres
 
 .. code:: json
 
     {
       "name": "local",
-      "type": "postgre",
+      "type": "sqlalchemy",
       "constring": "postgresql://user@localhost:5432/database"
+    }
+
+Presto
+
+.. code:: json
+
+    {
+      "name": "local",
+      "type": "sqlalchemy",
+      "constring": "presto://user@localhost:8889/default"
     }
 
 Email

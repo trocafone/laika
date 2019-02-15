@@ -201,11 +201,12 @@ in the data before sending them to an inner result. Columns not present in the
 data will be added. Can only be used with reports that return a ``pandas.DataFrame``
 as result (or some data structure accepted by DataFrame's constructor). All the
 configuration keys, besides ones this result defines, will be passed to the
-inner result.
+inner result. Can be useful if you need to adapt the data to some external
+format (i.e. Hive schema).
 
 Configuration:
 
--  columns: List of columns to ensure in the data, in the order you want them
+-  columns: List of columns to leave in the data, in the order you want them
    to appear for the inner result.
 -  inner_result_type: Type of result to use after fixing the data.
 -  default_value: This value will be used to fill missing columns with
@@ -227,7 +228,8 @@ Example of fixed columnar result:
 
 As you can see in the example, you define both configurations for the fixed
 columnar result, and the result it wraps (in this case a file result, with it's
-corresponding filename).
+corresponding filename). Only the columns defined in the configuration will be
+passed to the inner result.
 
 
 Module

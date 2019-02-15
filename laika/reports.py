@@ -542,7 +542,7 @@ class FacebookInsightsReport(BasicReport):
         'fields': 'impressions,reach',
         'action_attribution_windows': '28d_click'
     }
-    api_version = 'v3.0'
+    api_version = 'v3.1'
     base_url = 'https://graph.facebook.com/{}/{}'
     endpoint = '/insights'
     job_results_limit = 500
@@ -553,6 +553,7 @@ class FacebookInsightsReport(BasicReport):
     def __init__(self, *args, **kwargs):
         self.object_id = None
         super(FacebookInsightsReport, self).__init__(*args, **kwargs)
+        self.formatter = FilenameFormatter(*args)
 
         self.url = self.base_url + self.endpoint
 
@@ -562,8 +563,8 @@ class FacebookInsightsReport(BasicReport):
         if not any(k in d for k in ('date_preset', 'time_range', 'time_ranges')):
             since = self.formatter.format(self.since)
             until = self.formatter.format(self.until)
-            time_range = '{"since":"{}","until":"{}"}'.format(since, until)
-            d.update({'time_range': time_range})
+            time_range = '"since":"{}","until":"{}"'.format(since, until)
+            d.update({'time_range': '{' + time_range + '}'})
 
         self.params = d
 
