@@ -471,7 +471,7 @@ class AdwordsReport(BasicReport):
     dateRangeType = None
     date_range = {'min': '{Y-1d}{m-1d}{d-1d}', 'max': '{Y-1d}{m-1d}{d-1d}'}
 
-    adwords_service_version = 'v201806'
+    adwords_service_version = 'v201809'
 
     def __init__(self, *args, **kwargs):
         self.report_definition = None
