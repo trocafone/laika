@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.2.1] - 2019-03-21
+
+ - Updated adwords version to v201809
+
 ## [1.2.0] - 2019-02-15
 
  - Added reports from RTBHouse and Rakuten

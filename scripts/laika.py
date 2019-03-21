@@ -20,6 +20,7 @@ ENV_LAIKA_PWD = 'LAIKA_PWD'
 @click.command('run', short_help='runs the report', context_settings=dict(
                     help_option_names=['-h', '--help'], allow_extra_args=True,
                     ignore_unknown_options=True))
+@click.version_option(version=laika.__version__)
 @click.argument('report', default=None, required=False)
 @click.option('-c', '--config', default=None, help='config file to use')
 @click.option('-a', '--all', 'run_all', is_flag=True, help='run all reports')
