@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.2.2] - 2019-05-17
+
+ - Updated Facebook API version to 3.2
+ - Updated required googleads version to == 19.0.0
+
 ## [1.2.1] - 2019-03-21
 
  - Updated adwords version to v201809
