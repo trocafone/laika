@@ -35,8 +35,8 @@ Profiles
 ~~~~~~~~
 
 Profiles are all kind of credentials used for accessing external APIs
-(like Google Drive). You must specify a name and a path to credentials
-for each profile. For example:
+(like Google Drive). You can specify that credentials are defined in a file
+via ``credentials`` key:
 
 .. code:: json
 
@@ -45,9 +45,9 @@ for each profile. For example:
       "credentials": "secret.json"
     }
 
-``credentials`` is always a path to a json file, but it's format depends
+In this case ``credentials`` is path to a file, but file's format depends
 on each type of report or result. For example email credentials are
-defined like this:
+defined in json format like this:
 
 .. code:: json
 
@@ -55,6 +55,39 @@ defined like this:
       "username": "me@gmail.com",
       "password": "secret"
     }
+
+Other option is to define them in an enviroment variable. By default, laika
+will search for credentials in ``LAIKA_CREDENTIALS_<profile>`` enviroment
+variable, where *<profile>* is the uppercased name of the profile. Or you can
+specify your own enviroment variable through ``env_variable`` key.
+For example, given this profile definition:
+
+.. code:: json
+
+    {
+      "name": "my_profile"
+    }
+
+Laika will look for credentials in ``LAIKA_CREDENTIALS_MY_PROFILE``. So if the
+profile you're using is that for email result, make sure you defined this
+environment variable like that:
+
+.. code:: bash
+
+    $ export LAIKA_CREDENTIALS_MY_PROFILE = '{"username": "me@gmail.com", "password": "secret"}'
+
+
+And with this definition:
+
+
+.. code:: json
+
+    {
+      "name": "my_profile",
+      "env_variable": "CUSTOM_VARIABLE"
+    }
+
+Laika will take the credentials from ``CUSTOM_VARIABLE`` enviroment variable.
 
 Connections
 ~~~~~~~~~~~

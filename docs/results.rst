@@ -162,8 +162,8 @@ SFTP
 ``type: sftp``. Uploads the data to a SFTP server. Configurations for this
 kind of result are:
 
--  profile: Name of the profile to use. Credentials file must have
-   ``username`` and optionally ``password`` fields and/or ``private_key`` to
+-  profile: Name of the profile to use. Credentials must have ``username``
+   and optionally ``password`` fields and/or ``private_key`` to
    authenticate in the SFTP service. ``private_key`` should be a path to a file
    with the private key.
 -  connection: Name of a connection of ftp type.
