@@ -4,6 +4,8 @@
 
  - Credentials can now be specified through environment variable
  - Added Partitioned Result
+ - Updated required pandas version to 0.23.4
+ - Updated required psycopg2 version to 2.7.7
 
 ## [1.2.2] - 2019-05-17
 

@@ -19,7 +19,7 @@ with open('README.md') as f:
 
 excel = ['xlrd==1.1.0', 'XlsxWriter==0.8.4']
 sql = ['SQLAlchemy==1.2.17']
-postgres = sql + ['psycopg2==2.6.1']
+postgres = sql + ['psycopg2==2.7.7']
 presto = sql + ['PyHive[presto]==0.6.1']
 drive = ['PyDrive==1.3.1']
 adwords = ['googleads==19.0.0']
