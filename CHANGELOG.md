@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+ - Added Partitioned Result
+
 ## [1.2.2] - 2019-05-17
 
  - Updated Facebook API version to 3.2

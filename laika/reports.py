@@ -823,11 +823,12 @@ class FileResult(Result):
     index = True
     float_format = None
     header = True
+    variables = None
 
     def __init__(self, *args, **kwargs):
         super(FileResult, self).__init__(*args, **kwargs)
         self.extension = self.filename.split('.')[-1]
-        self.file_formatter = FilenameFormatter(self.conf)
+        self.file_formatter = FilenameFormatter(self.conf, self.variables)
         self.raw = not isinstance(self.data, (pd.DataFrame, pd.Panel))
 
     def get_filename(self):
@@ -1312,8 +1313,8 @@ class FixedColumnarResult(Result):
     before sending them to an inner result. If a column is not present in the
     data, a column is added and filled with some value (np.nan by default).
 
-    The data is expected to be a pandas.DataFrame or should be acceptable
-    by the DataFrame's constructor.
+    The data is expected to be a pandas.DataFrame or be acceptable by the
+    DataFrame's constructor.
     """
 
     columns = []
@@ -1332,6 +1333,49 @@ class FixedColumnarResult(Result):
 
     def save(self):
         self._inner_result.save()
+
+
+class PartitionedResult(Result):
+    """
+    Wrapper result that will partition the incoming data by the provided
+    partition key, and execute one inner result for each partition. Each inner
+    result will receive it's group in 'partition_group' variable, and will be
+    able to use in a template.
+
+    Can optionally partition the data by any key derived from a datetime field
+    via strftime, if the partition date format is provided: in that case
+    partition key must be a datetime column, or be convertable to one through
+    pd.to_datetime.
+
+    The data is expected to be a pandas.DataFrame or be acceptable by the
+    DataFrame's constructor.
+    """
+
+    partition_date_format = None
+
+    def __init__(self, conf, data, **kwargs):
+        super(PartitionedResult, self).__init__(conf, data, **kwargs)
+        data = data if isinstance(data, pd.DataFrame) else pd.DataFrame(data)
+
+        if self.partition_date_format:
+            group_index = pd.to_datetime(data[self.partition_key])
+            group_index = group_index.dt.strftime(self.partition_date_format)
+        else:
+            group_index = data[self.partition_key]
+
+        self._inner_results = []
+
+        variables = kwargs.pop('variables', {})
+        for group, group_data in data.groupby(group_index):
+            klass = conf.get_result_class(self.inner_result_type)
+            group_variables = variables.copy()
+            group_variables.update({'partition_group': group})
+            inner_result = klass(conf, group_data, variables=group_variables, **kwargs)
+            self._inner_results.append(inner_result)
+
+    def save(self):
+        for result in self._inner_results:
+            result.save()
 
 
 class Config(dict):
@@ -1370,7 +1414,8 @@ class Config(dict):
         'drive': UploadToGoogleDrive,
         'redash': RedashResult,
         's3': UploadToS3,
-        'fixed': FixedColumnarResult
+        'fixed': FixedColumnarResult,
+        'partitioned': PartitionedResult
     }
 
     def __init__(self, config, pwd=None):

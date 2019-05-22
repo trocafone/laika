@@ -47,8 +47,8 @@ Configurations for this result are:
    a list of paths to files.
 
 Subject and body can be formatted the same way filenames are formatted.
-You can find more about it in `Filenames
-templating <#filenames-templating>`__. Example of email result:
+You can find more about it in :ref:`filenames-templating`.
+Example of email result:
 
 .. code:: json
 
@@ -124,12 +124,10 @@ Example of drive result:
 Amazon S3
 ^^^^^^^^^
 
-.. note:: To use S3 result you must install ``drive`` dependency:
-    ``pip install laika-lib[drive]``
+.. note:: To use S3 result you must install ``s3`` dependency:
+    ``pip install laika-lib[s3]``
 
-``type: s3``. Saves the result in Amazon S3. In order to use this
-result, you have to install
-`boto3 <http://boto3.readthedocs.io/en/latest/guide/quickstart.html#installation>`__.
+``type: s3``. Saves the result in Amazon S3.
 
 Configuration:
 
@@ -230,6 +228,52 @@ As you can see in the example, you define both configurations for the fixed
 columnar result, and the result it wraps (in this case a file result, with it's
 corresponding filename). Only the columns defined in the configuration will be
 passed to the inner result.
+
+
+Partitioned Result
+^^^^^^^^^^^^^^^^^^
+
+``type: partitioned``. Wrapper result that partitions incoming data using one
+of it's columns as a partition key. For each obtained partition an inner result
+will be executed, with the data corresponding to the partition. The partition
+key is passed to each inner result via ``partition_group`` variable, that can
+be used in templates (see more in :ref:`filenames-templating`).
+This result can only be used with reports that return a ``pandas.DataFrame``
+(or some data structure accepted by DataFrame's constructor). All the
+configuration keys, besides ones this result defines, will be passed to the
+inner result.
+
+
+Configuration:
+ - partition_key: Name of the column to use as partition key. This field is
+   required.
+ - partition_date_format: Optional, if defined, partition key will be converted
+   to a string with the provided format. Partition key must have datetime type,
+   or be convertable to datetime trough `pandas.to_datetime <http://pandas.pydata.org/pandas-docs/version/0.19.2/generated/pandas.to_datetime.html>`__. The format
+   must follow Python's `datetime.strftime guidelines <https://docs.python.org/3/library/datetime.html#strftime-and-strptime-behavior>`__.
+ - inner_result_type: Type of result to for inner results.
+
+
+Example of partitioned result:
+
+
+.. code:: json
+
+    {
+      "type": "partitioned",
+      "partition_key": "my_date",
+      "partition_date_format": "%Y-%m",
+      "inner_result_type": "file",
+      "filename": "report_{partition_group}.csv"
+    }
+
+
+In this example, the incoming data will be partitioned by "my_date" column,
+previously converted to *YYYY-MM* format (which will fail if "my_date" column
+is not a date or datetime, nor it is directly convertable to one). Each of the
+resulting partitions will be saved in a separate file. So if, for example,
+"my_date" has dates in April and in May of 2019, this example will result in
+two files, ``report_2019-04.csv`` and ``reports_2019-05.csv``.
 
 
 Module
