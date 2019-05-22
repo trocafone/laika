@@ -2,6 +2,7 @@
 
 ## [Unreleased]
 
+ - Credentials can now be specified through environment variable
  - Added Partitioned Result
 
 ## [1.2.2] - 2019-05-17

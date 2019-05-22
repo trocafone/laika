@@ -38,8 +38,7 @@ def get_json_credentials(laika_object):
     Returns parsed content of credentials file for a given report or result.
     """
     profile = laika_object.conf['profiles'][laika_object.profile]
-    with open(profile['credentials']) as f:
-        data = json.load(f)
+    data = json.loads(profile['credentials'])
     return data
 
 
@@ -496,8 +495,8 @@ class AdwordsReport(BasicReport):
 
         from googleads import adwords
 
-        creds_file = self.conf['profiles'][self.profile]['credentials']
-        self.ads_client = adwords.AdWordsClient.LoadFromStorage(creds_file)
+        creds = self.conf['profiles'][self.profile]['credentials']
+        self.ads_client = adwords.AdWordsClient.LoadFromString(creds)
 
     def load_report(self, name):
         for key, report in self.conf['reports'].items():
@@ -1079,8 +1078,9 @@ def create_drive(profile, grant):
     # Authorization method taken from here:
     # http://stackoverflow.com/questions/22555433/pydrive-and-google-drive-automate-verification-process
     logging.info('Authorizing as %s', profile['name'])
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(
-        profile['credentials'], 'https://www.googleapis.com/auth/drive')
+    creds = json.loads(profile['credentials'])
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(
+        creds, 'https://www.googleapis.com/auth/drive')
     credentials.authorize(Http())
     credentials = credentials.create_delegated(grant)
     gauth = GoogleAuth()
@@ -1335,6 +1335,35 @@ class FixedColumnarResult(Result):
         self._inner_result.save()
 
 
+class Profile(six.moves.UserDict):
+    """
+    A dictionary that retrieves credentials on demand.
+    When 'credentials' key is accessed, this object will lazily read
+    credentials from a file or an environment variable.
+    """
+    _default_env_template = 'LAIKA_CREDENTIALS_{name}'
+    _contents_key = '_contents'
+
+    def _fetch_content(self):
+        creds_file = self.data.get('credentials')
+        if creds_file:
+            with open(creds_file) as f:
+                self.data[self._contents_key] = f.read()
+        else:
+            env_variable = self.data.get('env_variable')
+            if not env_variable:
+                env_variable = self._default_env_template.format(name=self['name']).upper()
+            self.data[self._contents_key] = os.environ[env_variable]
+
+    def __getitem__(self, key):
+        if key == 'credentials':
+            if self._contents_key not in self.data:
+                self._fetch_content()
+            return self.data[self._contents_key]
+
+        return self.data[key]
+
+
 class PartitionedResult(Result):
     """
     Wrapper result that will partition the incoming data by the provided
@@ -1434,8 +1463,10 @@ class Config(dict):
 
         self._update_config(config, self._get_includes(config))
 
-        for key in ['reports', 'profiles', 'connections']:
+        for key in ['reports', 'connections']:
             self[key] = {i['name']: i for i in self._conf[key]}
+
+        self['profiles'] = {p['name']: Profile(p) for p in self._conf['profiles']}
 
     def _get_includes(self, config):
         include_config = {}

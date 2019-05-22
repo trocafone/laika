@@ -151,7 +151,7 @@ parsing logic from the File report.
 
 Configuration:
 
--  profile: Name of the profile to use. It's credentials must be ones of
+-  profile: Name of the profile to use. Credentials must be ones of
    a service account with access to Google Drive's API.
 -  grant: email of a grant account, in the name of which the document
    will be downloaded. Grant must have access to specified folder.
@@ -393,7 +393,7 @@ Reported campaigns (advertisers) are all those created by the account.
 
 Configuration:
 
--  profile: Name of profile to use. Credentials file must be a json containing
+-  profile: Name of profile to use. Credentials must be a json containing
    ``username`` and ``password`` fields.
 -  day_from: Starting date for the period to retrieve costs for. You can set
    a relative date using :ref:`filenames-templating`.
@@ -435,7 +435,7 @@ Rakuten
 
 Configuration:
 
--  profile: Name of profile to use. Credentials file must be a json containing
+-  profile: Name of profile to use. Credentials must be a json containing
    ``token`` key, with a token to access Rakuten API.
 -  report_name: Existing report to download from the platform.
 -  filters: A set of filters to send to the API. Must be a dictionay, you can
