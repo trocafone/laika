@@ -823,11 +823,12 @@ class FileResult(Result):
     index = True
     float_format = None
     header = True
+    variables = None
 
     def __init__(self, *args, **kwargs):
         super(FileResult, self).__init__(*args, **kwargs)
         self.extension = self.filename.split('.')[-1]
-        self.file_formatter = FilenameFormatter(self.conf)
+        self.file_formatter = FilenameFormatter(self.conf, self.variables)
         self.raw = not isinstance(self.data, (pd.DataFrame, pd.Panel))
 
     def get_filename(self):
