@@ -1095,7 +1095,36 @@ def create_drive(profile, grant):
     return GoogleDrive(gauth)
 
 
-class DownloadFromGoogleDrive(FileReport):
+class DriveMixin(object):
+    start_timeout = 2
+    max_timeout = 300
+    retry_status_codes = (429,)  # 429 = Too many requests
+
+    def _drive_call(self, method, *args, **kwargs):
+        from pydrive.files import ApiRequestError
+        from googleapiclient.errors import HttpError
+        timeout, limit = self.start_timeout, self.max_timeout
+        while timeout < limit:
+            try:
+                result = method(*args, **kwargs)
+                return result
+            except (ApiRequestError, HttpError) as e:
+                # ApiRequestError is an IOError for some reason, that wraps
+                # an apiclient.errors.HttpError
+                if isinstance(e, ApiRequestError):
+                    status = e.args[0].resp.status
+                else:
+                    status = e.resp.status
+                if timeout < limit and (status >= 500 or status in self.retry_status_codes):
+                    log = 'An error occured executing %s: %s. Waiting %d seconds.'
+                    logging.info(log, method, e, timeout)
+                    time.sleep(timeout)
+                    timeout = timeout * 2
+                else:
+                    raise
+
+
+class DownloadFromGoogleDrive(FileReport, DriveMixin):
     """
     Downloads a file from Google Drive.
 
@@ -1138,7 +1167,7 @@ class DownloadFromGoogleDrive(FileReport):
         # if the file id is specified we don't need eveything else
         if self.file_id:
             logging.info('Downloading file by id')
-            fd = self.drive.CreateFile({'id': self.file_id})
+            fd = self._drive_call(self.drive.CreateFile, {'id': self.file_id})
         else:
             # look for folder and subfolder, if specified.
             parent_file = self.search_folder(self.folder, self.folder_id, None)
@@ -1150,7 +1179,7 @@ class DownloadFromGoogleDrive(FileReport):
                 query = "trashed=false and title='{}'".format(self.filename)
                 if parent_file:
                     query += " and '{}' in parents".format(parent_file['id'])
-                file_list = self.drive.ListFile({'q': query, 'maxResults': 1}).GetList()
+                file_list = self._drive_call(self.drive.ListFile({'q': query, 'maxResults': 1}).GetList)
                 if file_list:
                     fd = file_list[0]
                     logging.info('Downloading {} with id: {}'.format(fd['title'], fd['id']))
@@ -1160,7 +1189,7 @@ class DownloadFromGoogleDrive(FileReport):
             else:
                 raise ReportError('File is not specified!')
 
-        fd.FetchContent(mimetype=self.mimetype)
+        self._drive_call(fd.FetchContent, mimetype=self.mimetype)
         self.result_file = fd.content
         return self.process_path_or_buff(self.result_file)
 
@@ -1174,7 +1203,7 @@ class DownloadFromGoogleDrive(FileReport):
             query = "trashed=false and title='{}'".format(folder)
             if parent_folder_id:
                 query += " and '{}' in parents".format(parent_folder_id)
-            file_list = self.drive.ListFile({'q': query, 'maxResults': 1}).GetList()
+            file_list = self._drive_call(self.drive.ListFile({'q': query, 'maxResults': 1}).GetList)
             if file_list and file_list[0]['mimeType'] == 'application/vnd.google-apps.folder':
                 parent_file = file_list[0]
             else:
@@ -1186,7 +1215,7 @@ class DownloadFromGoogleDrive(FileReport):
         return parent_file
 
 
-class UploadToGoogleDrive(FileResult):
+class UploadToGoogleDrive(FileResult, DriveMixin):
     """
     Uploads the result to Google Drive.
 
@@ -1220,7 +1249,7 @@ class UploadToGoogleDrive(FileResult):
             # If folder is specified, verify it
             logging.info('Checking %s folder', self.folder)
             query = "trashed=false and title='{}'".format(self.folder)
-            file_list = self.drive.ListFile({'q': query, 'maxResults': 1}).GetList()
+            file_list = self._drive_call(self.drive.ListFile({'q': query, 'maxResults': 1}).GetList)
             if file_list and file_list[0]['mimeType'] == 'application/vnd.google-apps.folder':
                 parent_file = file_list[0]
             else:
@@ -1232,15 +1261,15 @@ class UploadToGoogleDrive(FileResult):
         query = "trashed=false and title='{}'".format(filename)
         if parent_file:
             query += " and '{}' in parents".format(parent_file['id'])
-        file_list = self.drive.ListFile({'q': query, 'maxResults': 1}).GetList()
+        file_list = self._drive_call(self.drive.ListFile({'q': query, 'maxResults': 1}).GetList)
         if file_list:
             result_file = file_list[0]
         else:
             # File does not exist, so we create a new one
             # In order to place it in the specified parent folder, it's id is needed
             parents = [{'id': parent_file['id']}] if parent_file else []
-            result_file = self.drive.CreateFile({'title': filename,
-               'parents': parents, 'mimeType': self.mime_type})
+            result_file = self._drive_call(self.drive.CreateFile,
+                {'title': filename, 'parents': parents, 'mimeType': self.mime_type})
 
         # Generating an io object with the spreadsheet
         logging.info('Writing the file')
@@ -1250,7 +1279,7 @@ class UploadToGoogleDrive(FileResult):
         # Uploading the file.
         logging.info('Uploading %s', filename)
         result_file.content = string_io
-        result_file.Upload()
+        self._drive_call(result_file.Upload)
 
 
 class RedashResult(WriteToFile):
