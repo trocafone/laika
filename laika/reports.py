@@ -1104,7 +1104,7 @@ class DriveMixin(object):
         from pydrive.files import ApiRequestError
         from googleapiclient.errors import HttpError
         timeout, limit = self.start_timeout, self.max_timeout
-        while timeout < limit:
+        while True:
             try:
                 result = method(*args, **kwargs)
                 return result
