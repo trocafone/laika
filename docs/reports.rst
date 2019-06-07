@@ -171,9 +171,9 @@ Configuration:
    fail with 500 errors. To work around this behaviour, in case of error the
    call is retried after waiting *start_timeout* (2 by default) seconds,
    doubling the waiting time after each error until reaching *max_timeout* (300
-   by default). *retry_status_codes* is a list of extra status codes to retry
-   after, ``[429]`` by default (429 is "too many requests").
-
+   by default). If the error persists after that, the exception will be raised.
+   *retry_status_codes* is a list of extra status codes to retry after,
+   ``[429]`` by default (429 is "too many requests").
 
 Example of a drive report:
 
