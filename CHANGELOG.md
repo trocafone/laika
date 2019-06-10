@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.3.1] - 2019-06-10
+
+ - Google Drive API calls now are retried on unexpected errors
+
 ## [1.3.0] - 2019-05-24
 
  - Credentials can now be specified through environment variable
