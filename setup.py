@@ -24,7 +24,7 @@ presto = sql + ['PyHive[presto]==0.6.1']
 drive = ['PyDrive==1.3.1']
 adwords = ['googleads==19.0.0']
 s3 = ['boto3==1.4.3']
-sftp = ['paramiko==2.0.1']
+sftp = ['paramiko==2.6.0']
 rtbhouse = ['rtbhouse_sdk==3.0.1']
 
 all_reports = excel + postgres + presto + drive + adwords + s3 + sftp + rtbhouse
