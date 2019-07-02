@@ -4,7 +4,7 @@
 
 ## [1.3.2] - 2019-07-02
 
-- Paramiko upgraded to 2.6.0
+ - Paramiko upgraded to 2.6.0
 
 ## [1.3.1] - 2019-06-10
 
