@@ -392,9 +392,6 @@ Example of facebook report:
 RTBHouse
 ^^^^^^^^
 
-.. note:: To use rtbhouse report you must install ``rtbhouse`` dependency:
-    ``pip install laika-lib[rtbhouse]``
-
 ``type: rtbhouse``. Downloads marketing costs report from RTBHouse API.
 Reported campaigns (advertisers) are all those created by the account.
 
