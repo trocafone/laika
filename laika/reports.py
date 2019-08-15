@@ -656,24 +656,24 @@ class RTBHouseReport(FormattedReport):
     """
     Retrieves marketing campaigns' costs for all the campaigns (advertisers)
     for your account.
-
-    Requires rtbhouse_sdk package.
     """
-    group_by = None
-    convention_type = None
+    api_url = 'https://api.panel.rtbhouse.com/v3'
+    group_by = 'day'
+    convention_type = 'ATTRIBUTED'
+    include_dpa = True
+
+    _timeout = 60
 
     campaign_names = {}
     column_names = {}
 
     def __init__(self, conf, **kwargs):
         super(RTBHouseReport, self).__init__(conf, **kwargs)
-        from rtbhouse_sdk.reports_api import ReportsApiSession
 
         logging.info('Starting RTBHouse report acquisition.')
         self.formatter = FilenameFormatter(conf)
 
-        creds = get_json_credentials(self)
-        self.api = ReportsApiSession(creds['username'], creds['password'])
+        self.creds = get_json_credentials(self)
 
     def process(self):
         stats = []
@@ -692,20 +692,37 @@ class RTBHouseReport(FormattedReport):
         costs_df.rename(columns=self.column_names, inplace=True)
         return costs_df
 
+    def _get(self, path, **kwargs):
+        kwargs['timeout'] = self._timeout
+        kwargs['auth'] = (self.creds['username'], self.creds['password'])
+        res = requests.get(self.api_url + path, **kwargs)
+        if not res.ok:
+            raise ReportError(res)
+
+        res_json = res.json()
+        return res_json.get('data') or {}
+
     def get_campaigns_info(self):
         logging.info('Acquiring account campaigns.')
-        advertisers = self.api.get_advertisers()
+        advertisers = self._get('/advertisers')
         logging.debug('{} campaigns available.'.format(len(advertisers)))
         return advertisers
 
     def get_campaigns_stats(self, campaign_id):
         logging.info('Acquiring {} campaign stats.'.format(str(campaign_id)))
-        campaign_stats = self.api.get_campaign_stats_total(campaign_id,
-                                                           self.formatter.format(self.day_from),
-                                                           self.formatter.format(self.day_to),
-                                                           self.group_by,
-                                                           self.convention_type)
-        return list(campaign_stats)
+        params = {
+            'dayFrom': self.formatter.format(self.day_from),
+            'dayTo': self.formatter.format(self.day_to),
+            'groupBy': self.group_by,
+            'countConvention': self.convention_type,
+        }
+        if self.include_dpa:
+            params['includeDpa'] = 'true'
+
+        return list(self._get(
+            '/advertisers/' + campaign_id + '/rtb-stats',
+            params=params
+        ))
 
 
 class RakutenReport(FormattedReport):
