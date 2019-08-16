@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.3.3] - 2019-08-16
+
+ - RTBHouse report now uses API instead of sdk
+
 ## [1.3.2] - 2019-07-02
 
  - Paramiko upgraded to 2.6.0
