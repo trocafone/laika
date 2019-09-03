@@ -19,11 +19,9 @@ configurations for this result are:
 
 -  filename: path to the file. Depending on the file extension this file
    will be saved as excel (xls or xlsx), tsv or csv.
--  encoding: Defaults to 'utf-8'.
--  index: Write index. True by default.
--  header: Write column names. True by default.
--  float_format: example_.
--  variables: Dict with variables to be replaced on filename.
+-  encoding: Defaults to "utf-8".
+-  index: Write index. true by default.
+-  header: Write column names. true by default.
 -  extra_args: Extra arguments for to_csv_ or to_excel_ not covered above.
 
 Example of a file result:
@@ -32,14 +30,12 @@ Example of a file result:
 
     "result": {
       "type": "file",
-      "filename": "output_{yesterday}.csv",
-      "variables": {"yesterday": "d-1d"},
+      "filename": "output.xlsx",
       "index": false,
       "header": false,
       "extra_args": {"sheet_name": "Very Important Sheet", "start_row": 3}
     }
 
-.. _example: http://www.datasciencemadesimple.com/format-integer-column-of-dataframe-in-python-pandas/
 .. _to_csv: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_csv.html
 .. _to_excel: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html
 

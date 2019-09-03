@@ -862,8 +862,8 @@ class FileResult(Result):
         rest as csv.
         """
         args = dict(encoding=self.encoding, index=self.index,
-                    float_format=self.float_format, header=self.header,
-                    **self.extra_args)
+                    float_format=self.float_format, header=self.header)
+        args.update(**self.extra_args)
         if self.extension in {'xls', 'xlsx', 'xlsm'}:
             self.data.to_excel(path_or_buf, engine='xlsxwriter', **args)
         else:
