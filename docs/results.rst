@@ -19,7 +19,7 @@ configurations for this result are:
 
 -  filename: path to the file. Depending on the file extension this file
    will be saved as excel (xls or xlsx), tsv or csv.
--  encoding: Defaults to 'utf-8'.
+-  encoding: Defaults to "utf-8".
 -  index: Write index. True by default.
 -  header: Write column names. True by default.
 -  float_format: example_.
