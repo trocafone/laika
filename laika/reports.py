@@ -840,6 +840,7 @@ class FileResult(Result):
     float_format = None
     header = True
     variables = None
+    extra_args = {}
 
     def __init__(self, *args, **kwargs):
         super(FileResult, self).__init__(*args, **kwargs)
@@ -862,6 +863,7 @@ class FileResult(Result):
         """
         args = dict(encoding=self.encoding, index=self.index,
                     float_format=self.float_format, header=self.header)
+        args.update(self.extra_args)
         if self.extension in {'xls', 'xlsx', 'xlsm'}:
             self.data.to_excel(path_or_buf, engine='xlsxwriter', **args)
         else:

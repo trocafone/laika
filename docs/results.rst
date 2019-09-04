@@ -19,6 +19,10 @@ configurations for this result are:
 
 -  filename: path to the file. Depending on the file extension this file
    will be saved as excel (xls or xlsx), tsv or csv.
+-  encoding: Defaults to "utf-8".
+-  index: Write index. true by default.
+-  header: Write column names. true by default.
+-  extra_args: Extra arguments for to_csv_ or to_excel_ not covered above.
 
 Example of a file result:
 
@@ -26,8 +30,14 @@ Example of a file result:
 
     "result": {
       "type": "file",
-      "filename": "output.csv"
+      "filename": "output.xlsx",
+      "index": false,
+      "header": false,
+      "extra_args": {"sheet_name": "Very Important Sheet", "start_row": 3}
     }
+
+.. _to_csv: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_csv.html
+.. _to_excel: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.to_excel.html
 
 Email
 ^^^^^
