@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.3.4] - 2019-09-11
+
+ - FileResult now accepts extra arguments for pandas io methods.
+
 ## [1.3.3] - 2019-08-16
 
  - RTBHouse report now uses API instead of sdk
