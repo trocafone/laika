@@ -292,10 +292,14 @@ class QueryReport(FormattedReport):
         self.engine = create_engine(constring)
 
     def process(self):
-        with open(self.query_file) as f:
-            logging.info('Executing query from %s', self.query_file)
-            query = self.formatter.format(f.read())
-            df = pd.read_sql_query(query, con=self.engine)
+        query = None
+        if self.query:
+            query = self.query
+        elif self.query_file:
+            with open(self.query_file) as f:
+                logging.info('Executing query from %s', self.query_file)
+                query = self.formatter.format(f.read())
+        df = pd.read_sql_query(query, con=self.engine)
         return df
 
 
