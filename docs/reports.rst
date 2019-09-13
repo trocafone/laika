@@ -52,7 +52,9 @@ Query
 with any database supported by Sqlalchemy but right now it's only tested
 with PostgreSQL and Presto. These are the configurations:
 
--  query\_file: path to a file that contains plane sql code.
+-  query: sql code to execute.
+-  query\_file: path to a file that contains plane sql code. Will be ignored if
+   query is specified.
 -  connection: name of the connection to use.
 -  variables: A dictionary with values to replace in query code. You can
    find further explanation in :ref:`query-templating`.
