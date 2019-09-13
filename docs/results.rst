@@ -154,7 +154,12 @@ Configuration:
    `Session <http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session>`__
    constructor. Example of a minimal aws credentials file for laika:
 
-``json   {     "aws_access_key_id": "my key id",     "aws_secret_access_key": "my secret access key"   }``
+.. code:: json
+
+    {
+        "aws_access_key_id": "my key id",
+        "aws_secret_access_key": "my secret access key"
+    }
 
 -  bucket: s3 bucket in which you want to save your data.
 -  filename: Name of the file to save. This config is the *key* of the

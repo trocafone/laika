@@ -30,7 +30,9 @@ Example of a file report:
       "name": "my_file_report",
       "type": "file",
       "filename": "/path/to/filename.xlsx",
-      "results": [...]
+      "results": [
+
+      ]
     }
 
 Query
@@ -71,7 +73,9 @@ Example of a query report:
       "variables": {
         "foo": "bar"
       },
-      "results": [...]
+      "results": [
+
+      ]
     }
 
 Bash Script
@@ -104,7 +108,9 @@ Example bash script report:
       "type": "bash",
       "script_file": "some_script.sh",
       "result_type": "json",
-      "results": [...]
+      "results": [
+
+      ]
     }
 
 Bash Script json format
@@ -121,8 +127,7 @@ These are some examples of the formats it accept:
 
     {
       "column_1": ["data_row_1", "data_row_2", "data_row_3"],
-      "column_2": ["data_row_1", "data_row_2", "data_row_3"],
-      ...
+      "column_2": ["data_row_1", "data_row_2", "data_row_3"]
     }
 
 *Example 2*:
@@ -139,7 +144,6 @@ These are some examples of the formats it accept:
         "column_1": "data_row_2",
         "column_3": "data_row_2"
       }
-      ...
     ]
 
 Download From Google Drive
@@ -210,7 +214,12 @@ Configuration:
    `Session <http://boto3.readthedocs.io/en/latest/reference/core/session.html#boto3.session.Session>`__
    constructor. Example of a minimal aws credentials file for laika:
 
-``json   {     "aws_access_key_id": "my key id",     "aws_secret_access_key": "my secret access key"   }``
+.. code:: json
+
+    {
+        "aws_access_key_id": "my key id",
+        "aws_secret_access_key": "my secret access key"
+    }
 
 -  bucket: s3 bucket to download the file from.
 -  filename: File to download. This config is the *key* of the file in
@@ -226,7 +235,9 @@ Example of a s3 report:
       "profile": "my_aws_profile",
       "bucket": "some.bucket",
       "filename": "reports/custom_report.csv",
-      "results": [...]
+      "results": [
+
+      ]
     }
 
 Redash
@@ -262,7 +273,9 @@ Example of a redash query:
       "parameters": {
           "hello": "world"
       },
-      "results": [...]
+      "results": [
+
+      ]
     }
 
 Adwords
@@ -335,7 +348,9 @@ Example of adwords query:
             ]
         }
       },
-      "results": [...]
+      "results": [
+
+      ]
     }
 
 Facebook Insights
@@ -381,13 +396,14 @@ Example of facebook report:
         "since": "{Y-1d}-{m-1d}-{d-1d}",
         "until": "{Y-1d}-{m-1d}-{d-1d}",
         "params": {
-            'level': 'ad',
-            'limit': 10000000,
-            'filtering': '[{"operator": "NOT_IN", "field": "ad.effective_status", "value": ["DELETED"]}]',
-            'fields': 'impressions,reach',
-            'action_attribution_windows': '28d_click'
+            "level": "ad",
+            "limit": 10000000,
+            "filtering": "[{\"operator\": \"NOT_IN\", \"field\": \"ad.effective_status\", \"value\": [\"DELETED\"]}]",
+            "fields": "impressions,reach",
+            "action_attribution_windows": "28d_click"
         },
-        "results": [...]
+        "results": [
+        ]
     }
 
 
@@ -430,7 +446,9 @@ Example of rtbhouse report:
         "campaignCost": "Cost",
         "day": "Date"
       },
-      "results": [...]
+      "results": [
+
+      ]
     }
 
 
