@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.3.5] - 2019-12-18
+
+ - Updated Facebook API version to 5.0
+
 ## [1.3.4] - 2019-09-11
 
  - FileResult now accepts extra arguments for pandas io methods
