@@ -303,7 +303,7 @@ class QueryReport(FormattedReport):
         return df
 
 
-class RedashReport(FormattedReport):
+class RedashReport(BasicReport):
     """
     Retrieves data from re:dash API. Makes a GET request to the endpoint.
     Needs redash_url, query_id and api_key in order to work (api_key can be
@@ -322,6 +322,7 @@ class RedashReport(FormattedReport):
         self.redash_url = None
         self.query_id = None
         super(RedashReport, self).__init__(*args, **kwargs)
+        self.formatter = FilenameFormatter(self.conf)
 
     def process(self):
         logging.info('Retrieving query %s from %s', self.query_id,
@@ -366,10 +367,8 @@ class RedashReport(FormattedReport):
         raise ReportError('Query failed to refresh')
 
     def format_parameters(self):
-        params = {}
-        if self.parameters:
-            params = {'p_' + key: val for (key, val) in six.iteritems(self.parameters)}
-        return params
+        return {'p_' + key: self.formatter.format(val)
+                for key, val in six.iteritems(self.parameters)}
 
 
 class BashReport(BasicReport):
