@@ -256,7 +256,7 @@ Redash
 -  refresh: True if you want an updated report. **Important**: For refresh
    to work the api\_key must be of user type.
 -  parameters: Dictionary of query parameters. They should be written as
-   they are defined in the query, without ``p_`` prefix. you can use
+   they are defined in the query, without ``p_`` prefix. You can use
    :ref:`filenames-templating` on the values.
 
 Example of a redash query:
