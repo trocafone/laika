@@ -173,6 +173,7 @@ Configuration:
    ``<folder>/<subfolder>/<filename>``
 -  file\_id: google drive's id of the file to download. If specified,
    all other file options are ignored.
+-  drive\_id: shared drive's id in case the file is in a shared drive.
 -  start_timeout, max_timeout, retry_status_codes: drive API calls sometimes
    fail with 500 errors. To work around this behaviour, in case of error the
    call is retried after waiting *start_timeout* (2 by default) seconds,

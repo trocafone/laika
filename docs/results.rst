@@ -114,6 +114,7 @@ configurations:
 -  folder\_id: Id of the directory in which the result will be saved. If
    specified, *folder* configuration will be ignored. You can get this
    id from the url in Google Drive web interface.
+-  drive\_id: shared drive's id in case file will be uploaded to a shared drive.
 -  grant: Email of user, in the name of whom the file will be uploaded.
    Must have access to specified folder.
 -  mime_type: Media type of the file to be uploaded. If none is specified
