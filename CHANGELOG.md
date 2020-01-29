@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.3.6] - 2020-01-30
+
+ - Added support for shared drives in Google Drive report and result
+ - Reash parameters can now be templated
+
 ## [1.3.5] - 2019-12-18
 
  - Updated Facebook API version to 5.0
