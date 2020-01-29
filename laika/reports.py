@@ -322,6 +322,8 @@ class RedashReport(FormattedReport):
         self.redash_url = None
         self.query_id = None
         super(RedashReport, self).__init__(*args, **kwargs)
+        self.file_formatter = FilenameFormatter(self.conf)
+        logging.info(self.format_parameters())
 
     def process(self):
         logging.info('Retrieving query %s from %s', self.query_id,
@@ -368,7 +370,7 @@ class RedashReport(FormattedReport):
     def format_parameters(self):
         params = {}
         if self.parameters:
-            params = {'p_' + key: val for (key, val) in six.iteritems(self.parameters)}
+            params = {'p_' + key: self.file_formatter.format(val) for (key, val) in six.iteritems(self.parameters)}
         return params
 
 
@@ -1250,6 +1252,7 @@ class UploadToGoogleDrive(FileResult, DriveMixin):
     folder = None
     folder_id = None
     mime_type = None
+    team_drive_id = None
 
     def __init__(self, *args, **kwargs):
         super(UploadToGoogleDrive, self).__init__(*args, **kwargs)
@@ -1268,11 +1271,19 @@ class UploadToGoogleDrive(FileResult, DriveMixin):
         parent_file, result_file = getattr(self, 'parent_file', None), None
         filename = self.get_filename()
 
+        query_arguments = {}
+        if self.team_drive_id is not None:
+            query_arguments.update({'teamDriveId': self.team_drive_id, 'corpora': "teamDrive",
+                                    'includeTeamDriveItems': "true", 'supportsTeamDrives': "true"})
+
         if not self.folder_id and parent_file is None and self.folder:
             # If folder is specified, verify it
             logging.info('Checking %s folder', self.folder)
             query = "trashed=false and title='{}'".format(self.folder)
-            file_list = self._drive_call(self.drive.ListFile({'q': query, 'maxResults': 1}).GetList)
+
+            query_arguments.update({'q': query, 'maxResults': 1})
+
+            file_list = self._drive_call(self.drive.ListFile(query_arguments).GetList)
             if file_list and file_list[0]['mimeType'] == 'application/vnd.google-apps.folder':
                 parent_file = file_list[0]
             else:
@@ -1284,15 +1295,25 @@ class UploadToGoogleDrive(FileResult, DriveMixin):
         query = "trashed=false and title='{}'".format(filename)
         if parent_file:
             query += " and '{}' in parents".format(parent_file['id'])
-        file_list = self._drive_call(self.drive.ListFile({'q': query, 'maxResults': 1}).GetList)
+
+        query_arguments.update({'q': query, 'maxResults': 1})
+        file_list = self._drive_call(self.drive.ListFile(query_arguments).GetList)
+
         if file_list:
             result_file = file_list[0]
         else:
             # File does not exist, so we create a new one
             # In order to place it in the specified parent folder, it's id is needed
             parents = [{'id': parent_file['id']}] if parent_file else []
-            result_file = self._drive_call(self.drive.CreateFile,
-                {'title': filename, 'parents': parents, 'mimeType': self.mime_type})
+
+            query_arguments = {'title': filename, 'parents': parents, 'mimeType': self.mime_type}
+            if self.team_drive_id is not None:
+                query_arguments['parents'][0].update({'kind': 'drive#fileLink', 
+                                                      'teamDriveId': self.team_drive_id})
+
+            # Generating an io object with the spreadsheet
+            logging.info('Creating file with arguments: {}'.format(query_arguments))
+            result_file = self._drive_call(self.drive.CreateFile, query_arguments)
 
         # Generating an io object with the spreadsheet
         logging.info('Writing the file')
@@ -1302,7 +1323,7 @@ class UploadToGoogleDrive(FileResult, DriveMixin):
         # Uploading the file.
         logging.info('Uploading %s', filename)
         result_file.content = string_io
-        self._drive_call(result_file.Upload)
+        self._drive_call(result_file.Upload, {'supportsTeamDrives': True})
 
 
 class RedashResult(WriteToFile):
