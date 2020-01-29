@@ -1121,6 +1121,7 @@ class DriveMixin(object):
     start_timeout = 2
     max_timeout = 300
     retry_status_codes = (429,)  # 429 = Too many requests
+    drive_id = None
 
     def _drive_call(self, method, *args, **kwargs):
         from pydrive.files import ApiRequestError
@@ -1144,6 +1145,22 @@ class DriveMixin(object):
                     timeout = timeout * 2
                 else:
                     raise
+
+    def _query_arguments(self, base_arguments):
+        """
+        Adds the required shared drive parameters to arguments in case
+        drive_id is specified
+        """
+        if self.drive_id is not None:
+            args = base_arguments.copy()
+            if args.get('parents', None):
+                args['parents'][0].update({'kind': 'drive#fileLink',
+                                           'driveId': self.drive_id})
+            else:
+                args.update({'driveId': self.drive_id, 'corpora': 'drive',
+                             'includeItemsFromAllDrives': 'true', 'supportsAllDrives': 'true'})
+            return args
+        return base_arguments
 
 
 class DownloadFromGoogleDrive(FileReport, DriveMixin):
@@ -1189,7 +1206,8 @@ class DownloadFromGoogleDrive(FileReport, DriveMixin):
         # if the file id is specified we don't need eveything else
         if self.file_id:
             logging.info('Downloading file by id')
-            fd = self._drive_call(self.drive.CreateFile, {'id': self.file_id})
+            query_arguments = self._query_arguments({'id': self.file_id})
+            fd = self._drive_call(self.drive.CreateFile, query_arguments)
         else:
             # look for folder and subfolder, if specified.
             parent_file = self.search_folder(self.folder, self.folder_id, None)
@@ -1201,7 +1219,8 @@ class DownloadFromGoogleDrive(FileReport, DriveMixin):
                 query = "trashed=false and title='{}'".format(self.filename)
                 if parent_file:
                     query += " and '{}' in parents".format(parent_file['id'])
-                file_list = self._drive_call(self.drive.ListFile({'q': query, 'maxResults': 1}).GetList)
+                query_arguments = self._query_arguments({'q': query, 'maxResults': 1})
+                file_list = self._drive_call(self.drive.ListFile(query_arguments).GetList)
                 if file_list:
                     fd = file_list[0]
                     logging.info('Downloading {} with id: {}'.format(fd['title'], fd['id']))
@@ -1211,6 +1230,8 @@ class DownloadFromGoogleDrive(FileReport, DriveMixin):
             else:
                 raise ReportError('File is not specified!')
 
+        # This will fail for shared drives at the moment because of PyDrive
+        # not letting pass extra arguments.
         self._drive_call(fd.FetchContent, mimetype=self.mimetype)
         self.result_file = fd.content
         return self.process_path_or_buff(self.result_file)
@@ -1225,7 +1246,8 @@ class DownloadFromGoogleDrive(FileReport, DriveMixin):
             query = "trashed=false and title='{}'".format(folder)
             if parent_folder_id:
                 query += " and '{}' in parents".format(parent_folder_id)
-            file_list = self._drive_call(self.drive.ListFile({'q': query, 'maxResults': 1}).GetList)
+            query_arguments = self._query_arguments({'q': query, 'maxResults': 1})
+            file_list = self._drive_call(self.drive.ListFile(query_arguments).GetList)
             if file_list and file_list[0]['mimeType'] == 'application/vnd.google-apps.folder':
                 parent_file = file_list[0]
             else:
@@ -1249,7 +1271,6 @@ class UploadToGoogleDrive(FileResult, DriveMixin):
     folder = None
     folder_id = None
     mime_type = None
-    team_drive_id = None
 
     def __init__(self, *args, **kwargs):
         super(UploadToGoogleDrive, self).__init__(*args, **kwargs)
@@ -1268,18 +1289,12 @@ class UploadToGoogleDrive(FileResult, DriveMixin):
         parent_file, result_file = getattr(self, 'parent_file', None), None
         filename = self.get_filename()
 
-        query_arguments = {}
-        if self.team_drive_id is not None:
-            query_arguments.update({'teamDriveId': self.team_drive_id, 'corpora': "teamDrive",
-                                    'includeTeamDriveItems': "true", 'supportsTeamDrives': "true"})
-
         if not self.folder_id and parent_file is None and self.folder:
             # If folder is specified, verify it
             logging.info('Checking %s folder', self.folder)
             query = "trashed=false and title='{}'".format(self.folder)
 
-            query_arguments.update({'q': query, 'maxResults': 1})
-
+            query_arguments = self._query_arguments({'q': query, 'maxResults': 1})
             file_list = self._drive_call(self.drive.ListFile(query_arguments).GetList)
             if file_list and file_list[0]['mimeType'] == 'application/vnd.google-apps.folder':
                 parent_file = file_list[0]
@@ -1293,7 +1308,7 @@ class UploadToGoogleDrive(FileResult, DriveMixin):
         if parent_file:
             query += " and '{}' in parents".format(parent_file['id'])
 
-        query_arguments.update({'q': query, 'maxResults': 1})
+        query_arguments = self._query_arguments({'q': query, 'maxResults': 1})
         file_list = self._drive_call(self.drive.ListFile(query_arguments).GetList)
 
         if file_list:
@@ -1303,10 +1318,8 @@ class UploadToGoogleDrive(FileResult, DriveMixin):
             # In order to place it in the specified parent folder, it's id is needed
             parents = [{'id': parent_file['id']}] if parent_file else []
 
-            query_arguments = {'title': filename, 'parents': parents, 'mimeType': self.mime_type}
-            if self.team_drive_id is not None:
-                query_arguments['parents'][0].update({'kind': 'drive#fileLink',
-                                                      'teamDriveId': self.team_drive_id})
+            base_arguments = {'title': filename, 'parents': parents, 'mimeType': self.mime_type}
+            query_arguments = self._query_arguments(base_arguments)
 
             # Generating an io object with the spreadsheet
             logging.info('Creating file with arguments: {}'.format(query_arguments))
@@ -1320,7 +1333,7 @@ class UploadToGoogleDrive(FileResult, DriveMixin):
         # Uploading the file.
         logging.info('Uploading %s', filename)
         result_file.content = string_io
-        self._drive_call(result_file.Upload, {'supportsTeamDrives': True})
+        self._drive_call(result_file.Upload, {'supportsAllDrives': True})
 
 
 class RedashResult(WriteToFile):
