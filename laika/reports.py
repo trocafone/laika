@@ -1091,7 +1091,14 @@ class UploadToSftp(FileResult):
 
 
 def create_drive(profile, grant):
-    from httplib2 import Http
+    def _get_http(**kwargs):
+        from httplib2 import Http
+        http = Http(**kwargs)
+        # Workaround to "Redirected but the response is missing a Location: header"
+        # https://stackoverflow.com/questions/59815620/gcloud-upload-httplib2-redirectmissinglocation-redirected-but-the-response-is-m
+        http.redirect_codes = set(http.redirect_codes) - {308}
+        return http
+
     from apiclient import discovery
     from pydrive.auth import GoogleAuth
     from pydrive.drive import GoogleDrive
@@ -1103,7 +1110,7 @@ def create_drive(profile, grant):
     creds = json.loads(profile['credentials'])
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(
         creds, 'https://www.googleapis.com/auth/drive')
-    credentials.authorize(Http())
+    credentials.authorize(_get_http())
     credentials = credentials.create_delegated(grant)
     gauth = GoogleAuth()
     # I repeat steps from GoogleAuth.Authorize method
@@ -1111,7 +1118,7 @@ def create_drive(profile, grant):
     # in order to assign credentials and tweak discovery build parameters
     # (to ignore cache discovery)
     gauth.credentials = credentials
-    http = Http(timeout=gauth.http_timeout)
+    http = _get_http(timeout=gauth.http_timeout)
     credentials.authorize(http)
     gauth.service = discovery.build('drive', 'v2', http=http, cache_discovery=False)
     return GoogleDrive(gauth)

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.3.7] - 2020-02-03
+
+ - Fixed interaction between google api and httlib2 libraries
+
 ## [1.3.6] - 2020-01-30
 
  - Added support for shared drives in Google Drive report and result
