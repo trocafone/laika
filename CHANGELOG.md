@@ -2,9 +2,13 @@
 
 ## [Unreleased]
 
+## [1.3.8] - 2020-02-04
+
+ - Patch PyDrive to work with new version of httplib2
+
 ## [1.3.7] - 2020-02-03
 
- - Fixed interaction between google api and httlib2 libraries
+ - Fixed interaction between google api and httplib2 libraries
 
 ## [1.3.6] - 2020-01-30
 
