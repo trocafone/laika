@@ -1091,34 +1091,39 @@ class UploadToSftp(FileResult):
 
 
 def create_drive(profile, grant):
-    def _get_http(**kwargs):
-        from httplib2 import Http
-        http = Http(**kwargs)
-        # Workaround to "Redirected but the response is missing a Location: header"
-        # https://stackoverflow.com/questions/59815620/gcloud-upload-httplib2-redirectmissinglocation-redirected-but-the-response-is-m
-        http.redirect_codes = set(http.redirect_codes) - {308}
-        return http
-
+    """ auth google drive, used in both classes """
+    from httplib2 import Http
     from apiclient import discovery
     from pydrive.auth import GoogleAuth
     from pydrive.drive import GoogleDrive
     from oauth2client.service_account import ServiceAccountCredentials
-    """auth google drive, used in both classes"""
     # Authorization method taken from here:
     # http://stackoverflow.com/questions/22555433/pydrive-and-google-drive-automate-verification-process
     logging.info('Authorizing as %s', profile['name'])
     creds = json.loads(profile['credentials'])
     credentials = ServiceAccountCredentials.from_json_keyfile_dict(
         creds, 'https://www.googleapis.com/auth/drive')
-    credentials.authorize(_get_http())
+    credentials.authorize(Http())
     credentials = credentials.create_delegated(grant)
-    gauth = GoogleAuth()
+
+    class CustomGoogleAuth(GoogleAuth):
+
+        def Get_Http_Object(self):
+            http = Http(timeout=self.http_timeout)
+            self.credentials.authorize(http)
+            # Workaround to "Redirected but the response is missing a Location: header"
+            # https://stackoverflow.com/questions/59815620/gcloud-upload-httplib2-redirectmissinglocation-redirected-but-the-response-is-m
+            http.redirect_codes = set(http.redirect_codes) - {308}
+            return http
+
+    gauth = CustomGoogleAuth()
+
     # I repeat steps from GoogleAuth.Authorize method
     # https://github.com/googledrive/PyDrive/blob/1.3.1/pydrive/auth.py#L513
     # in order to assign credentials and tweak discovery build parameters
     # (to ignore cache discovery)
     gauth.credentials = credentials
-    http = _get_http(timeout=gauth.http_timeout)
+    http = Http(timeout=gauth.http_timeout)
     credentials.authorize(http)
     gauth.service = discovery.build('drive', 'v2', http=http, cache_discovery=False)
     return GoogleDrive(gauth)
