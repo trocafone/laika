@@ -162,7 +162,7 @@ class ReportFormatter(object):
             result = now
             replacements = None
 
-            if d == 'now':
+            if d == 'now' or d.lower() == 'a':
                 pass
             elif d.lower() == 't' or d.lower() == 'd':
                 replacements = time_dict
@@ -216,7 +216,7 @@ class FilenameFormatter(ReportFormatter):
     def _to_format(self, value, fname=None):
         splitted = fname.split('-' if '-' in fname else '+')
         key = splitted.pop(0).strip()
-        f = dict(zip('yYmdDhHM', 'YYmddHHM')).get(key, None)
+        f = dict(zip('yYmdDhHMaA', 'YYmddHHMaA')).get(key, None)
         return value.strftime('%' + f) if f else value
 
 
