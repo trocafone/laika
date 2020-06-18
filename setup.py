@@ -19,11 +19,11 @@ with open('README.md') as f:
 
 excel = ['xlrd==1.1.0', 'XlsxWriter==0.8.4']
 sql = ['SQLAlchemy==1.2.17']
-postgres = sql + ['psycopg2==2.7.7']
+postgres = sql + ['psycopg2==2.8.5']
 presto = sql + ['PyHive[presto]==0.6.1']
 drive = ['PyDrive==1.3.1', 'httplib2>=0.17.0']
 adwords = ['googleads==19.0.0']
-s3 = ['boto3==1.4.3']
+s3 = ['boto3==1.14.3']
 sftp = ['paramiko==2.6.0']
 
 all_reports = excel + postgres + presto + drive + adwords + s3 + sftp
