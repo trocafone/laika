@@ -58,8 +58,8 @@ with PostgreSQL and Presto. These are the configurations:
 -  query\_file: path to a file that contains plane sql code. Will be ignored if
    query is specified.
 -  connection: name of the connection to use.
--  variables: A dictionary with values to replace in query code. You can
-   find further explanation in :ref:`query-templating`.
+-  variables: A dictionary with values to replace in query code. It can be overwritten
+   via the cli. You can find further explanation in :ref:`query-templating`.
 
 Example of a query report:
 

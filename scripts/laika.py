@@ -5,6 +5,7 @@ import click
 import logging
 import os
 import sys
+import json
 
 # Temporary fix to use script having same name as the module
 if os.path.dirname(os.path.realpath(__file__)) == sys.path[0]:
@@ -56,6 +57,9 @@ def run(ctx, report, run_all, config, show_list, loglevel, pwd):
                     '\n\t- '.join(sorted(conf.get_available_reports()))) + '\n')
 
     extra_args = dict(zip(*2 * [iter(a.replace('--', '') for a in ctx.args)]))
+
+    if 'variables' in extra_args:
+        extra_args['variables'] = json.loads(extra_args['variables'])
 
     conf.overwrite_attributes(extra_args)
 

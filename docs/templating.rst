@@ -99,6 +99,12 @@ dates, so you can define in your configuration variables like this:
 
 ``{yesterday}`` will be converted into ``2016-02-12 17:19:09``.
 
+Variables can be overwritten via the cli providing a json:
+
+.. code:: bash
+
+    $ laika.py my_report --variables '{"my_var": "new value"}'
+
 .. _filenames-templating:
 
 Filenames templating
