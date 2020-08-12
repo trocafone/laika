@@ -82,6 +82,12 @@ this:
 
 ``my_field`` configuration will contain ``bar`` as value.
 
+The argument ``variables`` can also be overwritten, but it requires a valid json:
+
+.. code:: bash
+
+    $ laika.py my_report --variables '{"bar": "foo"}'
+
 You can also overwrite :ref:`global-configuration` via command line arguments.
 
 
