@@ -660,7 +660,7 @@ class RTBHouseReport(FormattedReport):
     Retrieves marketing campaigns' costs for all the campaigns (advertisers)
     for your account.
     """
-    api_url = 'https://api.panel.rtbhouse.com/v3'
+    api_url = 'https://api.panel.rtbhouse.com/v4'
     group_by = 'day'
     convention_type = 'ATTRIBUTED'
     include_dpa = True
