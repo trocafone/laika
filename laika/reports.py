@@ -660,10 +660,12 @@ class RTBHouseReport(FormattedReport):
     Retrieves marketing campaigns' costs for all the campaigns (advertisers)
     for your account.
     """
-    api_url = 'https://api.panel.rtbhouse.com/v4'
+    api_url = 'https://api.panel.rtbhouse.com/v5'
     group_by = 'day'
     convention_type = 'ATTRIBUTED'
     include_dpa = True
+    metrics = ('campaignCost-clicksCount-conversionsCount-conversionsValue-cr-'
+               'ecpa-impsCount')
 
     _timeout = 60
 
@@ -700,7 +702,7 @@ class RTBHouseReport(FormattedReport):
         kwargs['auth'] = (self.creds['username'], self.creds['password'])
         res = requests.get(self.api_url + path, **kwargs)
         if not res.ok:
-            raise ReportError(res)
+            raise ReportError(str(res) + '\n' + str(res.content))
 
         res_json = res.json()
         return res_json.get('data') or {}
@@ -717,10 +719,9 @@ class RTBHouseReport(FormattedReport):
             'dayFrom': self.formatter.format(self.day_from),
             'dayTo': self.formatter.format(self.day_to),
             'groupBy': self.group_by,
+            'metrics': self.metrics,
             'countConvention': self.convention_type,
         }
-        if self.include_dpa:
-            params['includeDpa'] = 'true'
 
         return list(self._get(
             '/advertisers/' + campaign_id + '/rtb-stats',
