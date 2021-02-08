@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+ - Updated RTBHouse API version to 5
+ - Updated Facebook API version to 8
+ - Allow overwriting configuration values from cli
+
 ## [1.3.8] - 2020-02-04
 
  - Patch PyDrive to work with new version of httplib2
