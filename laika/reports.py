@@ -914,7 +914,7 @@ class WriteToFile(FileResult):
         logging.info('Writing result to %s', filename)
 
         if self.raw:
-            mode = 'w+' + ('b' if isinstance(self.data, bytes) else '')
+            mode = 'w+' + ('b' if isinstance(self.data, (bytes, six.BytesIO)) else '')
             with open(filename, mode) as f:
                 if is_buffer(self.data):
                     self.data.seek(0)
