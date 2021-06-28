@@ -14,6 +14,7 @@ import requests
 import shlex
 import six
 import subprocess
+import tempfile
 import time
 
 from datetime import datetime
@@ -765,6 +766,140 @@ class RakutenReport(FormattedReport):
         logging.info(msg.format(report_name=self.report_name, lines=len(report_df)))
 
         return report_df
+
+
+class BingAdsReport(FileReport):
+    """
+    Downloads report from Microsoft Ads platform
+    """
+    customer_id = None
+    account_id = None
+
+    environment = 'production'
+    report_request_timeout = None
+    verbose = True
+    filename = 'result.csv'
+
+    # report definition
+    report_name = None
+    report_request_type = 'KeywordPerformanceReportRequest'
+    report_scope = 'AccountThroughAdGroupReportScope'
+    report_columns_type = 'ArrayOfKeywordPerformanceReportColumn'
+    report_account_ids = []
+    report_columns = [
+        'TimePeriod',
+        'AccountId',
+        'CampaignId',
+        'Keyword',
+        'Impressions',
+        'Clicks',
+        'Spend'
+    ]
+
+    aggregation = 'Daily'
+    exclude_column_headers = False
+    exclude_report_footer = True
+    exclude_report_header = False
+
+    predefined_time = 'Yesterday'
+    start_date = None
+    end_date = None
+    report_time_zone = None
+    return_only_complete_data = False
+
+    def __init__(self, *args, **kwargs):
+        super(BingAdsReport, self).__init__(*args, **kwargs)
+        self.credentials = get_json_credentials(self)
+
+    def process(self):
+        from bingads import AuthorizationData, ServiceClient
+        from bingads.authorization import OAuthDesktopMobileAuthCodeGrant
+        from bingads.v13.reporting import ReportingServiceManager, ReportingDownloadParameters
+
+        if self.verbose:
+            logging.getLogger('suds.client').setLevel(logging.DEBUG)
+            logging.getLogger('suds.transport.http').setLevel(logging.DEBUG)
+
+        authorization_data = AuthorizationData(
+            account_id=self.account_id,
+            customer_id=self.customer_id,
+            developer_token=self.credentials['developer_token'],
+            authentication=None
+        )
+
+        authentication = OAuthDesktopMobileAuthCodeGrant(
+            client_id=self.credentials['client_id'],
+            env=self.environment
+        )
+
+        authentication.state = self.credentials['state']
+        authorization_data.authentication = authentication
+        refresh_token = self.credentials['refresh_token']
+        authentication.request_oauth_tokens_by_refresh_token(refresh_token)
+
+        reporting_service = ServiceClient(
+            service='ReportingService',
+            version=13,
+            authorization_data=authorization_data,
+            environment=self.environment
+        )
+
+        reporting_service_manager = ReportingServiceManager(
+            authorization_data=authorization_data,
+            poll_interval_in_milliseconds=5000,
+            environment=self.environment
+        )
+
+        report_request = reporting_service.factory.create(self.report_request_type)
+
+        time = reporting_service.factory.create('ReportTime')
+        if self.start_date and self.end_date:
+            start_date = self.get_date_definition(reporting_service, self.start_date)
+            end_date = self.get_date_definition(reporting_service, self.end_date)
+            time.CustomDateRangeStart = start_date
+            time.CustomDateRangeEnd = end_date
+        else:
+            time.PredefinedTime = self.predefined_time
+        time.ReportTimeZone = self.report_time_zone
+
+        report_request.Aggregation = self.aggregation
+        report_request.ExcludeColumnHeaders = self.exclude_column_headers
+        report_request.ExcludeReportFooter = self.exclude_report_footer
+        report_request.ExcludeReportHeader = self.exclude_report_header
+        report_request.Format = self.extension.title()
+        report_request.ReturnOnlyCompleteData = self.return_only_complete_data
+        report_request.Time = time
+        report_request.ReportName = self.report_name
+        scope = reporting_service.factory.create(self.report_scope)
+        scope.AccountIds = {'long': self.report_account_ids}
+        scope.Campaigns = None
+        report_request.Scope = scope
+
+        report_columns = reporting_service.factory.create(self.report_columns_type)
+        report_columns.KeywordPerformanceReportColumn.append(self.report_columns)
+        report_request.Columns = report_columns
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            reporting_download_parameters = ReportingDownloadParameters(
+                report_request=report_request,
+                result_file_directory=temp_dir,
+                result_file_name=self.filename,
+                overwrite_result_file=True,
+                timeout_in_milliseconds=self.report_request_timeout
+            )
+
+            file_path = reporting_service_manager.download_file(reporting_download_parameters)
+
+            with open(file_path, 'rb') as f:
+                return self.process_path_or_buff(f)
+
+    def get_date_definition(self, reporting_service, date):
+        date = datetime.strptime(self.file_formatter.format(date), '%Y-%m-%d')
+        date_object = reporting_service.factory.create('Date')
+        date_object.Day = date.day
+        date_object.Month = date.month
+        date_object.Year = date.year
+        return date_object
 
 
 class DownloadFromS3(FileReport):
@@ -1528,7 +1663,8 @@ class Config(dict):
         'drive': DownloadFromGoogleDrive,
         's3': DownloadFromS3,
         'rtbhouse': RTBHouseReport,
-        'rakuten': RakutenReport
+        'rakuten': RakutenReport,
+        'bingads': BingAdsReport
     }
     _result_map = {
         'module': ModuleResult,

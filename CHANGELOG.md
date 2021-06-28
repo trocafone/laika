@@ -5,6 +5,7 @@
  - Updated Facebook Graph API version to v10.0
  - Updated RTBHouse API version to 5
  - Allow overwriting configuration values from cli
+ - Added BingAds report
 
 ## [1.3.8] - 2020-02-04
 

@@ -25,8 +25,9 @@ drive = ['PyDrive==1.3.1', 'httplib2>=0.17.0']
 adwords = ['googleads==19.0.0']
 s3 = ['boto3==1.14.3']
 sftp = ['paramiko==2.6.0']
+bingads = ['bingads==13.0.10']
 
-all_reports = excel + postgres + presto + drive + adwords + s3 + sftp
+all_reports = excel + postgres + presto + drive + adwords + s3 + sftp + bingads
 
 test = ['mock==1.3.0']
 docs = ['Sphinx>=1.7.1', 'sphinx-rtd-theme>=0.2.4']
@@ -71,6 +72,7 @@ setup(
         'adwords': adwords,
         's3': s3,
         'sftp': sftp,
+        'bingads': bingads,
 
         'all_reports': all_reports,
 
