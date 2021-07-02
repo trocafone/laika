@@ -484,6 +484,55 @@ Example of rakuten report:
     }
 
 
+BingAds
+^^^^^^^
+
+.. note:: To use bingads report you must install ``bingads`` dependency:
+    ``pip install laika-lib[bingads]``
+
+``type: bingads``. Downloads reports from Microsoft Ads portal using Bingads SDK. The
+configurations are:
+
+-  profile: Name of profile to use. Credentials file must be a a *.json* containing ``client_id``, ``developer_token``, ``state`` and ``refresh_token``. Find more about authentication `here <https://docs.microsoft.com/en-us/advertising/guides/authentication-oauth?view=bingads-13>`__.
+-  customer_id and account_id: IDs of accounts you want to authenticate for. You can see how to obtain these IDs in `this part of documentation <https://docs.microsoft.com/en-us/advertising/guides/get-started?view=bingads-13#get-ids>`__.
+-  report_request_type: Report request data object. You can see all the available data object `here <https://docs.microsoft.com/en-us/advertising/reporting-service/reporting-data-objects>`__.
+-  start_date and end_date: you can define a period for the data you want. These fields are templated via :ref:`filenames-templating`.
+-  predefined_time: in case you don't specify start_date and end_date, you can set a predefined_time. Default value is "Yesterday"
+
+BingAds report accepts more parameters, you can see examples in `Microsoft's documenentation <https://docs.microsoft.com/en-us/advertising/guides/code-example-report-requests?view=bingads-13>`__ and verify which of the parameters laika accepts checking source code.
+
+Example of BingAds report:
+
+.. code:: json
+
+    {
+      "name": "bingads_keyword_performance",
+      "type": "bingads",
+      "profile": "my_bingads_profile",
+      "customer_id": 1234567,
+      "report_request_type": "KeywordPerformanceReportRequest",
+      "report_account_ids": [1234567, 2345678],
+      "report_columns": [
+          "TimePeriod",
+          "AccountId",
+          "CampaignId",
+          "CampaignName",
+          "Keyword",
+          "DeviceType",
+          "Network",
+          "Impressions",
+          "Clicks",
+          "Spend",
+          "BidMatchType",
+          "Ctr",
+          "AverageCpc",
+          "QualityScore"
+      ],
+      "start_date": "{Y}-{m}-{d}",
+      "end_date": "{Y}-{m}-{d}"
+    }
+
+
 Module
 ^^^^^^
 
