@@ -890,8 +890,9 @@ class BingAdsReport(FileReport):
 
             file_path = reporting_service_manager.download_file(reporting_download_parameters)
 
-            with open(file_path, 'rb') as f:
-                return self.process_path_or_buff(f)
+            if file_path:
+                with open(file_path, 'rb') as f:
+                    return self.process_path_or_buff(f)
 
     def get_date_definition(self, reporting_service, date):
         date = datetime.strptime(self.file_formatter.format(date), '%Y-%m-%d')
