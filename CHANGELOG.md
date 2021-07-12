@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [1.4.0] - 2020-07-02
+## [1.4.0] - 2020-07-12
 
  - Updated Facebook Graph API version to v10.0
  - Updated RTBHouse API version to 5
