@@ -295,7 +295,7 @@ class QueryReport(FormattedReport):
     def process(self):
         query = None
         if self.query:
-            query = self.query
+            query = self.formatter.format(self.query)
         elif self.query_file:
             with open(self.query_file) as f:
                 logging.info('Executing query from %s', self.query_file)
@@ -979,13 +979,13 @@ class FileResult(Result):
     index = True
     float_format = None
     header = True
-    variables = None
+    result_variables = None
     extra_args = {}
 
     def __init__(self, *args, **kwargs):
         super(FileResult, self).__init__(*args, **kwargs)
         self.extension = self.filename.split('.')[-1]
-        self.file_formatter = FilenameFormatter(self.conf, self.variables)
+        self.file_formatter = FilenameFormatter(self.conf, self.result_variables)
         self.raw = not isinstance(self.data, (pd.DataFrame, pd.Panel))
 
     def get_filename(self):
@@ -1626,12 +1626,12 @@ class PartitionedResult(Result):
 
         self._inner_results = []
 
-        variables = kwargs.pop('variables', {})
+        result_variables = kwargs.pop('result_variables', {})
         for group, group_data in data.groupby(group_index):
             klass = conf.get_result_class(self.inner_result_type)
-            group_variables = variables.copy()
+            group_variables = result_variables.copy()
             group_variables.update({'partition_group': group})
-            inner_result = klass(conf, group_data, variables=group_variables, **kwargs)
+            inner_result = klass(conf, group_data, result_variables=group_variables, **kwargs)
             self._inner_results.append(inner_result)
 
     def save(self):
