@@ -295,7 +295,7 @@ class QueryReport(FormattedReport):
     def process(self):
         query = None
         if self.query:
-            query = self.query
+            query = self.formatter.format(self.query)
         elif self.query_file:
             with open(self.query_file) as f:
                 logging.info('Executing query from %s', self.query_file)
