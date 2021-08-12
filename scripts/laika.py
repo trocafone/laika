@@ -61,6 +61,9 @@ def run(ctx, report, run_all, config, show_list, loglevel, pwd):
     if 'variables' in extra_args:
         extra_args['variables'] = json.loads(extra_args['variables'])
 
+    if 'result_variables' in extra_args:
+        extra_args['result_variables'] = json.loads(extra_args['result_variables'])
+
     conf.overwrite_attributes(extra_args)
 
     runner = laika.Runner(conf, **extra_args)
