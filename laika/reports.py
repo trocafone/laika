@@ -134,8 +134,8 @@ class ReportFormatter(object):
         return value.strftime('%Y-%m-%d %H:%M:%S')
 
     def _apply_variables(self, report_string):
-        if self.variables:
-            report_string = report_string.format(**self.variables)
+        for k, v in self.variables.items():
+            report_string = report_string.replace('{' + k + '}', str(v))
         return report_string
 
     def get_now(self):
@@ -979,7 +979,7 @@ class FileResult(Result):
     index = True
     float_format = None
     header = True
-    result_variables = None
+    result_variables = {}
     extra_args = {}
 
     def __init__(self, *args, **kwargs):
