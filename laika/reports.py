@@ -125,7 +125,7 @@ class ReportFormatter(object):
 
     """
 
-    def __init__(self, conf=None, variables=None, **kwargs):
+    def __init__(self, conf=None, variables={}, **kwargs):
         self.conf = conf
         self.variables = variables
 
@@ -225,7 +225,7 @@ class FormattedReport(BasicReport):
     """ Report that holds a ReportFormatter instance """
 
     def __init__(self, conf, *args, **kwargs):
-        self.variables = None
+        self.variables = {}
         BasicReport.__init__(self, conf, *args, **kwargs)
         self.formatter = ReportFormatter(self.conf, self.variables)
 
