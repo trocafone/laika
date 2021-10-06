@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+ - Updated Facebook Graph API version to v12.0
+
 ## [1.4.0] - 2020-07-12
 
  - Updated Facebook Graph API version to v10.0

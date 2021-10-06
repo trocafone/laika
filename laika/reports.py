@@ -545,7 +545,7 @@ class FacebookInsightsReport(BasicReport):
         'fields': 'impressions,reach',
         'action_attribution_windows': '28d_click'
     }
-    api_version = 'v10.0'
+    api_version = 'v12.0'
     base_url = 'https://graph.facebook.com/{}/{}'
     endpoint = '/insights'
     job_results_limit = 500
