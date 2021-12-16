@@ -169,7 +169,7 @@ class ReportFormatter(object):
                 replacements = time_dict
             elif d == 'm':
                 replacements = dict(day=1, **time_dict)
-            elif d.lower() == 'y':
+            elif d.lower() == 'y' or d == 'b':
                 replacements = dict(day=1, month=1, **time_dict)
             elif d.lower() == 'h':
                 replacements = dict(minute=0, second=0, microsecond=0)
@@ -217,7 +217,7 @@ class FilenameFormatter(ReportFormatter):
     def _to_format(self, value, fname=None):
         splitted = fname.split('-' if '-' in fname else '+')
         key = splitted.pop(0).strip()
-        f = dict(zip('yYmdDhHMaA', 'YYmddHHMaA')).get(key, None)
+        f = dict(zip('yYmdDhHMaAb', 'YYmddHHMaAy')).get(key, None)
         return value.strftime('%' + f) if f else value
 
 
