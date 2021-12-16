@@ -3,6 +3,7 @@
 ## [Unreleased]
 
  - Updated Facebook Graph API version to v12.0
+ - Add option to download Redash result as csv
 
 ## [1.4.0] - 2020-07-12
 

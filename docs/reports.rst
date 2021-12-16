@@ -259,6 +259,7 @@ Redash
 -  parameters: Dictionary of query parameters. They should be written as
    they are defined in the query, without ``p_`` prefix. You can use
    :ref:`filenames-templating` on the values.
+-  result_format: the format to download the results in. Can be ``json`` (default) or ``csv``.
 
 Example of a redash query:
 
@@ -271,6 +272,7 @@ Example of a redash query:
       "query_id": "123",
       "redash_url": "https://some.redash.com",
       "refresh": true,
+      "result_format": "json",
       "parameters": {
           "hello": "world"
       },

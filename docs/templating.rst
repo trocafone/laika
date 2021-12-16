@@ -128,4 +128,4 @@ Will result in ``report_2016-01``.
 
 Two extra parameters you can use in this type of templating are ``a`` and
 ``A``. They will be replaced by abbreviated and full weekday name respectively
-(i.e. "Mon" and "Monday").
+(i.e. "Mon" and "Monday"). Another extra option is ``b`` which gets translated to "YY" (two-digit year).
