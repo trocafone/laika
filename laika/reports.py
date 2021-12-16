@@ -317,6 +317,7 @@ class RedashReport(BasicReport):
     max_retries = 60
     sleep_time = 1
     parameters = {}
+    result_format = 'json'
 
     def __init__(self, *args, **kwargs):
         self.api_key = None
@@ -334,13 +335,18 @@ class RedashReport(BasicReport):
         if self.refresh:
             result_id = self.refresh_query(requests_session)
 
-        path = '{}/api/queries/{}/results{}.json'.format(self.redash_url,
-                                                         self.query_id,
-                                                         result_id)
+        path = '{}/api/queries/{}/results{}.{}'
+        path = path.format(self.redash_url, self.query_id, result_id, self.result_format)
+
         response = requests_session.get(path, params=self.format_parameters())
 
-        data = response.json()['query_result']['data']
-        return pd.DataFrame(data['rows'])
+        if self.result_format == 'json':
+            data = response.json()['query_result']['data']
+            return pd.DataFrame(data['rows'])
+        elif self.result_format == 'csv':
+            return pd.read_csv(six.StringIO(response.text))
+        else:
+            raise ReportError('result_format must be json or csv!')
 
     def refresh_query(self, requests_session):
         logging.info('Refreshing query')
