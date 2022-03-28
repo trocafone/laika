@@ -2,6 +2,7 @@
 
 import os
 import imp
+import csv
 import pytz
 import json
 import datetime as dt
@@ -529,6 +530,78 @@ class AdwordsReport(BasicReport):
             )
             first_client_id_processed = True
         return result
+
+
+class GoogleAdsReport(BasicReport):
+    """
+    Sends a query to Google Ads search API and returns the results as a csv
+    file. Query can be passed as a string or in a separate file in query_file
+    parameter.
+
+    More about reporting queries in Google Ads API:
+    https://developers.google.com/google-ads/api/docs/reporting/overview
+
+    Internally uses google-ads library to make the request.
+    """
+
+    query = None
+    query_file = None
+    header = None
+    customer_id = None
+
+    def __init__(self, *args, **kwargs):
+        super(GoogleAdsReport, self).__init__(*args, **kwargs)
+
+        self.formatter = FilenameFormatter(*args)
+        self.creds = self.conf['profiles'][self.profile]['credentials']
+
+    def process(self):
+        from google.protobuf import json_format
+        from google.api_core import protobuf_helpers
+        from google.ads.googleads.client import GoogleAdsClient
+
+        if not self.query and self.query_file:
+            with open(self.query_file) as f:
+                logging.info('Reading query from %s', self.query_file)
+                self.query = f.read()
+
+        self.query = self.formatter.format(self.query)
+
+        client = GoogleAdsClient.load_from_string(self.creds)
+        service = client.get_service('GoogleAdsService')
+
+        logging.info('Executing query:')
+        logging.info(self.query)
+        stream = service.search_stream(query=self.query, customer_id=self.customer_id)
+
+        results, fieldnames = [], None
+        for batch in stream:
+            for msg in batch.results:
+                # MessageToDict is useful because it brings Enum names instead
+                # of values by default. preserving_proto_field_name flag is
+                # needed in order for fields to match with paths in field_mask.
+                row = json_format.MessageToDict(msg, preserving_proto_field_name=True)
+                fieldnames = batch.field_mask.paths
+
+                # Here we flatten the message dict and filter out fields that
+                # aren't explicitly selected in the query (like resource names)
+                clean_row = {}
+                for path in fieldnames:
+                    # MessageToDict will not include null metrics sometimes,
+                    # we use a value from the original message in this case
+                    _default = protobuf_helpers.get(msg, path)
+                    clean_row[path] = protobuf_helpers.get(row, path, default=_default)
+
+                results.append(clean_row)
+
+        # Return result as a csv file
+        data = six.StringIO()
+        if self.header:
+            data.write(self.formatter.format(self.header) + '\n')
+        csv_writer = csv.DictWriter(data, fieldnames)
+        csv_writer.writeheader()
+        csv_writer.writerows(results)
+        return data
 
 
 class FacebookInsightsReport(BasicReport):
@@ -1665,6 +1738,7 @@ class Config(dict):
         'redash': RedashReport,
         'bash': BashReport,
         'adwords': AdwordsReport,
+        'googleads': GoogleAdsReport,
         'facebook': FacebookInsightsReport,
         'trackeame': TrackeameReport,
         'drive': DownloadFromGoogleDrive,
