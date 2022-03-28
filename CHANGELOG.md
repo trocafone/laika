@@ -3,6 +3,7 @@
 ## [Unreleased]
 
  - Updated Facebook Graph API version to v12.0
+ - Added Google Ads report
 
 ## [1.4.0] - 2020-07-12
 
