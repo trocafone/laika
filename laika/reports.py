@@ -546,8 +546,9 @@ class GoogleAdsReport(BasicReport):
 
     query = None
     query_file = None
-    header = None
     customer_id = None
+    header = None
+    fieldnames = None
 
     def __init__(self, *args, **kwargs):
         super(GoogleAdsReport, self).__init__(*args, **kwargs)
@@ -585,12 +586,13 @@ class GoogleAdsReport(BasicReport):
 
                 # Here we flatten the message dict and filter out fields that
                 # aren't explicitly selected in the query (like resource names)
-                clean_row = {}
+                clean_row = []
                 for path in fieldnames:
                     # MessageToDict will not include null metrics sometimes,
                     # we use a value from the original message in this case
                     _default = protobuf_helpers.get(msg, path)
-                    clean_row[path] = protobuf_helpers.get(row, path, default=_default)
+                    value = protobuf_helpers.get(row, path, default=_default)
+                    clean_row.append(value)
 
                 results.append(clean_row)
 
@@ -598,8 +600,10 @@ class GoogleAdsReport(BasicReport):
         data = six.StringIO()
         if self.header:
             data.write(self.formatter.format(self.header) + '\n')
-        csv_writer = csv.DictWriter(data, fieldnames)
-        csv_writer.writeheader()
+        if self.fieldnames:
+            fieldnames = self.fieldnames
+        csv_writer = csv.writer(data)
+        csv_writer.writerow(fieldnames)
         csv_writer.writerows(results)
         return data
 

@@ -300,6 +300,9 @@ Configuration:
    Id of google ads customers to get the data from.
 -  header: Optional text to add as the first line in the resulting report. This
    field is templated.
+-  fieldnames: Optional list of column names to use in the resulting report.
+   header and fieldnames parameters serve to achieve the same format as in the
+   deprecated adwords report.
 
 Example of Google Ads report:
 
