@@ -297,7 +297,9 @@ Configuration:
 -  query_file: Alternatively you can specify a file which contents will be
    templated and used as query.
 -  `customer\_id <https://support.google.com/adwords/answer/29198?hl=en>`__.
-   Id of google ads customers to get the data from.
+   Ids of google ads customers to get the data from. Can be a string in format
+   "1234567890" or a list of such strings, in which case the query results for
+   each customer will be concatenated.
 -  header: Optional text to add as the first line in the resulting report. This
    field is templated.
 -  fieldnames: Optional list of column names to use in the resulting report.

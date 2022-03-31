@@ -555,6 +555,11 @@ class GoogleAdsReport(BasicReport):
 
         self.formatter = FilenameFormatter(*args)
         self.creds = self.conf['profiles'][self.profile]['credentials']
+        if self.customer_id:
+            if not isinstance(self.customer_id, list):
+                self.customer_id = [self.customer_id]
+        else:
+            raise ValueError('You have to specify customer_id!')
 
     def process(self):
         from google.protobuf import json_format
@@ -567,34 +572,35 @@ class GoogleAdsReport(BasicReport):
                 self.query = f.read()
 
         self.query = self.formatter.format(self.query)
+        logging.info('Formatted query: %s', self.query)
 
         client = GoogleAdsClient.load_from_string(self.creds)
         service = client.get_service('GoogleAdsService')
 
-        logging.info('Executing query:')
-        logging.info(self.query)
-        stream = service.search_stream(query=self.query, customer_id=self.customer_id)
-
         results, fieldnames = [], None
-        for batch in stream:
-            for msg in batch.results:
-                # MessageToDict is useful because it brings Enum names instead
-                # of values by default. preserving_proto_field_name flag is
-                # needed in order for fields to match with paths in field_mask.
-                row = json_format.MessageToDict(msg, preserving_proto_field_name=True)
-                fieldnames = batch.field_mask.paths
+        for customer_id in self.customer_id:
+            logging.info('Querying for customer: %s', customer_id)
+            stream = service.search_stream(query=self.query, customer_id=customer_id)
 
-                # Here we flatten the message dict and filter out fields that
-                # aren't explicitly selected in the query (like resource names)
-                clean_row = []
-                for path in fieldnames:
-                    # MessageToDict will not include null metrics sometimes,
-                    # we use a value from the original message in this case
-                    _default = protobuf_helpers.get(msg, path)
-                    value = protobuf_helpers.get(row, path, default=_default)
-                    clean_row.append(value)
+            for batch in stream:
+                for msg in batch.results:
+                    # MessageToDict is useful because it brings Enum names instead
+                    # of values by default. preserving_proto_field_name flag is
+                    # needed in order for fields to match with paths in field_mask.
+                    row = json_format.MessageToDict(msg, preserving_proto_field_name=True)
+                    fieldnames = batch.field_mask.paths
 
-                results.append(clean_row)
+                    # Here we flatten the message dict and filter out fields that
+                    # aren't explicitly selected in the query (like resource names)
+                    clean_row = []
+                    for path in fieldnames:
+                        # MessageToDict will not include null metrics sometimes,
+                        # we use a value from the original message in this case
+                        _default = protobuf_helpers.get(msg, path)
+                        value = protobuf_helpers.get(row, path, default=_default)
+                        clean_row.append(value)
+
+                    results.append(clean_row)
 
         # Return result as a csv file
         data = six.StringIO()
