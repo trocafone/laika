@@ -594,6 +594,12 @@ class GoogleAdsReport(BasicReport):
                     # aren't explicitly selected in the query (like resource names)
                     clean_row = []
                     for path in fieldnames:
+                        # Fieldnames that are reserved python keywords appear in
+                        # python objects with trailing underscore. So far i
+                        # only found "type_". TODO: find a cleaner way of doing this
+                        if path.endswith('.type'):
+                            path += '_'
+
                         # MessageToDict will not include null metrics sometimes,
                         # we use a value from the original message in this case
                         _default = protobuf_helpers.get(msg, path)
