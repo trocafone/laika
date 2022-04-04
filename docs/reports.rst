@@ -279,8 +279,54 @@ Example of a redash query:
       ]
     }
 
+Google Ads Report
+^^^^^^^^^^^^^^^^^
+
+.. note:: To use google ads report you must install ``googleads`` dependency:
+    ``pip install laika-lib[googleads]``
+
+``type: googleads``. This report makes a query to Google Ads reporting API. To
+learn more about Google Ads reporting queries, please refer to
+`the documentation <https://developers.google.com/google-ads/api/docs/reporting/overview>`__.
+
+Configuration:
+
+-  profile: Name of profile to use. Credentials file is a *.yaml*, you can learn
+   more about it's contents `here <https://developers.google.com/google-ads/api/docs/client-libs/python/configuration>`__.
+-  query: Plain text query to send to Google Ads API. This field is templated.
+-  query_file: Alternatively you can specify a file which contents will be
+   templated and used as query.
+-  `customer\_id <https://support.google.com/adwords/answer/29198?hl=en>`__.
+   Ids of google ads customers to get the data from. Can be a string in format
+   "1234567890" or a list of such strings, in which case the query results for
+   each customer will be concatenated.
+-  header: Optional text to add as the first line in the resulting report. This
+   field is templated.
+-  fieldnames: Optional list of column names to use in the resulting report.
+   header and fieldnames parameters serve to achieve the same format as in the
+   deprecated adwords report.
+
+Example of Google Ads report:
+
+.. code:: json
+
+    {
+      "name": "google_ads_shopping_performance_yesterday",
+      "type": "googleads",
+      "customer_id": "1234567890",
+      "query": "SELECT segments.device, segments.date, customer.descriptive_name, campaign.name, ad_group.name, metrics.clicks, metrics.impressions, metrics.cost_micros, metrics.conversions FROM shopping_performance_view WHERE segments.date BETWEEN '{Y-1d}-{m-1d}-{d-1d}' AND '{Y-1d}-{m-1d}-{d-1d}'",
+      "profile": "my_googleads_profile",
+      "header": "Shopping Daily Performance ({Y}-{m}-{d})",
+      "results": [
+
+      ]
+    }
+
 Adwords
 ^^^^^^^
+
+.. Warning:: This API is being deprecated by google, use googleads report instead.
+    `More about deprecation <https://ads-developers.googleblog.com/2021/04/upgrade-to-google-ads-api-from-adwords.html>`__.
 
 .. note:: To use adwords report you must install ``adwords`` dependency:
     ``pip install laika-lib[adwords]``

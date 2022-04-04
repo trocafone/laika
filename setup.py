@@ -23,11 +23,12 @@ postgres = sql + ['psycopg2==2.8.5']
 presto = sql + ['PyHive[presto]==0.6.1']
 drive = ['PyDrive==1.3.1', 'httplib2>=0.17.0']
 adwords = ['googleads==19.0.0']
+googleads = ['google-ads==15.0.0']
 s3 = ['boto3==1.14.3']
 sftp = ['paramiko==2.6.0']
 bingads = ['bingads==13.0.10']
 
-all_reports = excel + postgres + presto + drive + adwords + s3 + sftp + bingads
+all_reports = excel + postgres + presto + drive + adwords + s3 + sftp + bingads + googleads
 
 test = ['mock==1.3.0']
 docs = ['Sphinx>=1.7.1', 'sphinx-rtd-theme>=0.2.4']
@@ -70,6 +71,7 @@ setup(
         'presto': presto,
         'drive': drive,
         'adwords': adwords,
+        'googleads': googleads,
         's3': s3,
         'sftp': sftp,
         'bingads': bingads,
