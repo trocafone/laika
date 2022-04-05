@@ -617,7 +617,7 @@ class GoogleAdsReport(BasicReport):
         csv_writer = csv.writer(data)
         csv_writer.writerow(fieldnames)
         csv_writer.writerows(results)
-        return data
+        return data.getvalue().encode('utf-8')
 
 
 class FacebookInsightsReport(BasicReport):
