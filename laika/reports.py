@@ -638,8 +638,9 @@ class FacebookInsightsReport(BasicReport):
         'limit': 10000000,
         'filtering': '[{"operator": "NOT_IN", "field": "ad.effective_status", "value": ["DELETED"]}]',
         'fields': 'impressions,reach',
-        'action_attribution_windows': '28d_click'
+        'action_attribution_windows': '7d_click'
     }
+
     api_version = 'v12.0'
     base_url = 'https://graph.facebook.com/{}/{}'
     endpoint = '/insights'
