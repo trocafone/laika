@@ -641,7 +641,7 @@ class FacebookInsightsReport(BasicReport):
         'action_attribution_windows': '7d_click'
     }
 
-    api_version = 'v12.0'
+    api_version = 'v14.0'
     base_url = 'https://graph.facebook.com/{}/{}'
     endpoint = '/insights'
     job_results_limit = 500

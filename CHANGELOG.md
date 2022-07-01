@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
- - Updated Facebook Graph API version to v12.0
+ - Updated Facebook Graph API version to v14.0
  - Add option to download Redash result as csv
  - Added Google Ads report
 
