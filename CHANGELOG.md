@@ -5,6 +5,7 @@
  - Updated Facebook Graph API version to v12.0
  - Add option to download Redash result as csv
  - Added Google Ads report
+ - Added support for default drive id in Google Drive profile
 
 ## [1.4.0] - 2020-07-12
 

@@ -158,7 +158,9 @@ parsing logic from the File report.
 Configuration:
 
 -  profile: Name of the profile to use. Credentials must be ones of
-   a service account with access to Google Drive's API.
+   a service account with access to Google Drive's API. Google drive profile
+   also allows one extra key, ``default_drive_id``, with shared drive's id to
+   use for all the calls.
 -  grant: email of a grant account, in the name of which the document
    will be downloaded. Grant must have access to specified folder.
 -  filename: name of the file to download.
