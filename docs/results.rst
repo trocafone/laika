@@ -105,7 +105,9 @@ Google Drive
 configurations:
 
 -  profile: Name of the profile to use. Credentials of this profile must
-   be ones of a service account with access to Google Drive API.
+   be ones of a service account with access to Google Drive API. Google drive
+   profile also allows one extra key, ``default_drive_id``, with shared drive's
+   id to use for all the calls.
 -  filename: Name for the resulting file.
 -  folder: Directory in which the file will be stored. If not specified,
    the file is stored in the root of given drive. If there is more than
