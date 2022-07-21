@@ -6,6 +6,7 @@
  - Add option to download Redash result as csv
  - Added Google Ads report
  - Added support for default drive id in Google Drive profile
+ - Migrate to PyDrive2 from PyDrive
 
 ## [1.4.0] - 2020-07-12
 
