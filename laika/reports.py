@@ -1327,8 +1327,8 @@ def create_drive(profile, grant):
     """ auth google drive, used in both classes """
     from httplib2 import Http
     from apiclient import discovery
-    from pydrive.auth import GoogleAuth
-    from pydrive.drive import GoogleDrive
+    from pydrive2.auth import GoogleAuth
+    from pydrive2.drive import GoogleDrive
     from oauth2client.service_account import ServiceAccountCredentials
     # Authorization method taken from here:
     # http://stackoverflow.com/questions/22555433/pydrive-and-google-drive-automate-verification-process
@@ -1369,7 +1369,7 @@ class DriveMixin(object):
     drive_id = None
 
     def _drive_call(self, method, *args, **kwargs):
-        from pydrive.files import ApiRequestError
+        from pydrive2.files import ApiRequestError
         from googleapiclient.errors import HttpError
         timeout, limit = self.start_timeout, self.max_timeout
         while True:
@@ -1476,8 +1476,8 @@ class DownloadFromGoogleDrive(FileReport, DriveMixin):
             else:
                 raise ReportError('File is not specified!')
 
-        # This will fail for shared drives at the moment because of PyDrive
-        # not letting pass extra arguments.
+        # This will fail for shared drives at the moment because of PyDrive
+        # not letting pass extra arguments.
         self._drive_call(fd.FetchContent, mimetype=self.mimetype)
         self.result_file = fd.content
         return self.process_path_or_buff(self.result_file)
