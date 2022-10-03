@@ -1433,7 +1433,7 @@ class DownloadFromGoogleDrive(FileReport, DriveMixin):
 
     def __init__(self, *args, **kwargs):
         super(DownloadFromGoogleDrive, self).__init__(*args, **kwargs)
-        profile = self.conf['profiles'][self.profile]
+        profile = self.conf['profiles'][self.profile].copy()
         self.drive_id = self.drive_id or profile.pop('default_drive_id', None)
         self.drive = create_drive(profile, self.grant)
 
@@ -1520,7 +1520,7 @@ class UploadToGoogleDrive(FileResult, DriveMixin):
 
     def __init__(self, *args, **kwargs):
         super(UploadToGoogleDrive, self).__init__(*args, **kwargs)
-        profile = self.conf['profiles'][self.profile]
+        profile = self.conf['profiles'][self.profile].copy()
         self.drive_id = self.drive_id or profile.pop('default_drive_id', None)
         self.drive = create_drive(profile, self.grant)
 
@@ -1692,6 +1692,9 @@ class Profile(six.moves.UserDict):
             return self.data[self._contents_key]
 
         return self.data[key]
+
+    def copy(self):
+        return Profile(self.data.copy())
 
 
 class PartitionedResult(Result):
